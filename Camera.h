@@ -8,7 +8,7 @@ public:
 
 	Camera(int width, int height);
 	void Update(double delta);
-	inline const D3D::cbPerObject getConstantBufferObj() const { return cbPerObj; };
+	inline const D3D::cbPerObject getConstantBufferObj() { return cbPerObj; };
 	~Camera();
 
 private:

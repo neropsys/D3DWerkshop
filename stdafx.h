@@ -20,3 +20,6 @@
 
 // TODO: reference additional headers your program requires here
 #include "fbxsdk.h"
+#include <assert.h>
+#include <d3dcompiler.h>
+#include <DirectXMath.h>

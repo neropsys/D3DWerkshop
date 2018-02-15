@@ -1,7 +1,7 @@
 #pragma once
 #include<fbxsdk.h>
 #include <vector>
-struct Vertex;
+#include "Vertex.h"
 class ModelLoader {
 public:
 	inline const std::vector<Vertex>& GetVertexList() const { return mVertices; }

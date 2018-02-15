@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "GraphicResources.h"
 #include "Vertex.h"
-#include <d3dcompiler.h>
+
 #include "Camera.h"
 #include "ModelLoader.h"
+#include "Utilities.h"
 namespace Resources {
 
 	ID3D11Buffer* g_constantBuffer;
@@ -21,11 +22,7 @@ namespace Resources {
 
 	ID3D11Buffer* g_triIndiceBuffer = nullptr;
 	ID3D11Buffer* g_triVertexBuffer = nullptr;
-	D3D11_INPUT_ELEMENT_DESC vertexLayout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-	};
+
 	void Release()
 	{
 		Release(g_vsBuffer);
@@ -38,7 +35,7 @@ namespace Resources {
 		Release(g_triVertexBuffer);
 		Release(g_constantBuffer);
 	}
-	UINT numElements = ARRAYSIZE(vertexLayout);
+	//UINT numElements = ARRAYSIZE(vertexLayout);
 	static int indexCount = 0;
 	void InitResources()
 	{
@@ -62,68 +59,18 @@ namespace Resources {
 			assert(SUCCEEDED(D3D::device->CreateBuffer(&cbbd, NULL, &g_constantBuffer)));
 		}
 
-
 		D3D::deviceContext->VSSetShader(g_vertexShader, 0, 0);
 		D3D::deviceContext->PSSetShader(g_pixelShader, 0, 0);
-
-		//sqare
-		{
-// 			Vertex v[] = {
-// 				Vertex(-0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f),
-// 				Vertex(-0.5f,  0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f),
-// 				Vertex(0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f),
-// 				Vertex(0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f),
-// 			};
-// 			D3D11_BUFFER_DESC vertexBufferDesc;
-// 			ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
-// 			vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-// 			vertexBufferDesc.ByteWidth = sizeof(Vertex) * 4;
-// 			vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-// 			vertexBufferDesc.CPUAccessFlags = 0;
-// 			vertexBufferDesc.MiscFlags = 0;
-// 
-// 			D3D11_SUBRESOURCE_DATA vertexBufferData;
-// 			ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
-// 
-// 			vertexBufferData.pSysMem = v;
-// 			hr = D3D::device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &g_squareVertexBuffer);
-// 			assert(SUCCEEDED(hr));
-// 
-// 			auto stride = sizeof(Vertex);
-// 			UINT offset = 0;
-// 
-// 			D3D::deviceContext->IASetVertexBuffers(0, 1, &g_squareVertexBuffer, &stride, &offset);
-// 
-// 
-// 			DWORD indices[] = {
-// 				0, 1, 2,
-// 				0, 2, 3,
-// 			};
-// 			D3D11_BUFFER_DESC indexBufferDesc;
-// 			ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
-// 			indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-// 			indexBufferDesc.ByteWidth = sizeof(DWORD) * 2 * 3;
-// 			indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-// 			indexBufferDesc.CPUAccessFlags = 0;
-// 
-// 			D3D11_SUBRESOURCE_DATA initData;
-// 			initData.pSysMem = indices;
-// 			hr = D3D::device->CreateBuffer(&indexBufferDesc, &initData, &g_indiceBuffer);
-// 			assert(SUCCEEDED(hr));
-// 
-// 			D3D::deviceContext->IASetIndexBuffer(g_indiceBuffer, DXGI_FORMAT_R32_UINT, 0);
-// 
-// 
-// 			hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &g_inputLayout);
-// 			assert(SUCCEEDED(hr));
-
-			
-		}
 		//triangle
 		{
+			char buffer[MAX_PATH];
+			//ZeroMemory(buffer, MAX_PATH);
+			GetModuleFileName(NULL, buffer, MAX_PATH);
+			auto filePath = path::GetAbsPath("2B.fbx");
+
 			ModelLoader loader;
 			loader.Init();
-			loader.Load("cone.fbx");
+			loader.Load(filePath.c_str());
 
 			D3D11_BUFFER_DESC vertexBufferDesc;
 			ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
@@ -163,7 +110,7 @@ namespace Resources {
 			D3D::deviceContext->IASetIndexBuffer(g_triIndiceBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 
-			hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &g_inputLayout);
+			//hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &g_inputLayout);
 
 		}
 		D3D::deviceContext->IASetInputLayout(g_inputLayout);

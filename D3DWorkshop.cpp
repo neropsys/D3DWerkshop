@@ -5,17 +5,18 @@
 #include "D3DWorkshop.h"
 #include "D3D.h"
 #include <timeapi.h>
-#include "GraphicResources.h"
+#include "Scene.h"
 #include "Camera.h"
 #include <memory>
 #include "DInput.h"
 #define MAX_LOADSTRING 100
 
+Scene g_scene;
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-std::unique_ptr<Camera> g_cam;
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -62,10 +63,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			double timeDelta = (currTime - lastTime) * 0.0007;
 
 			DInput::Update(timeDelta);
-			g_cam->Update(timeDelta);
-			Resources::UpdateResources(g_cam->getConstantBufferObj());
-			D3D::BeginScene();
 
+			g_scene.Update(timeDelta);
+			D3D::BeginScene();
+			g_scene.Draw();
 			D3D::Render(timeDelta);
 			D3D::EndScene();
 			lastTime = currTime;
@@ -128,12 +129,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    }
    RECT rect;
    GetWindowRect(hWnd, &rect);//todo: get width height properly
-   g_cam = std::make_unique<Camera>(1280, 720);
+
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
    D3D::InitD3D(hInstance, 1280, 720, hWnd);
    DInput::Init(hInst, hWnd);
-   Resources::InitResources();
+   g_scene.Init();
+   
    return TRUE;
 }
 
