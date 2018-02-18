@@ -52,4 +52,5 @@ void DInput::Update(double time)
 
 	mpMouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 	mpKeyboard->GetDeviceState(sizeof(mKeyboardState), (LPVOID)&mKeyboardState);
+
 }

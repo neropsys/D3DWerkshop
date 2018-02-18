@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "VertexLayout.h"
+#include "DInput.h"
 namespace D3D {
 	extern ID3D11Device* device;
 	extern ID3D11DeviceContext* deviceContext;
@@ -29,9 +30,10 @@ void Scene::Init()
 	UINT numElements = ARRAYSIZE(vertexLayout);
 	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
 
+	auto model = Model("2B.fbx");
+	//model.
 
-
-	m_models.emplace_back(Model("2B.fbx"));
+	m_models.emplace_back(model);
 
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -47,13 +49,18 @@ void Scene::Init()
 
 void Scene::Update(float delta)
 {
-	g_cam->Update(delta);
+	//if (DInput::GetKeyboardState(DIK_W))
+	//{
+		g_cam->Update(delta);
+	//}
 	D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &g_cam->getConstantBufferObj(), 0, 0);
 	//D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, )
-	for (const auto& it : m_models)
-	{
-		it.Update(delta);
-	}
+
+		for (const auto& it : m_models)
+		{
+			it.Update(delta);
+		}
+	
 }
 
 void Scene::Draw()

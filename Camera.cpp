@@ -3,7 +3,7 @@
 #include <math.h>
 
 Camera::Camera(int width, int height) :
-	camPos(DirectX::XMVectorSet(0.f, 0.f, -2.f, 0.0f)),
+	camPos(DirectX::XMVectorSet(0.f, 10.f, -10.f, 0.0f)),
 	camTarget(DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f)),
 	camUp(DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f)),
 	

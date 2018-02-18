@@ -8,6 +8,9 @@ public:
 	~Model();
 	void Update(float delta) const;
 	void Draw() const;
+	inline void SetPos(XMFLOAT3 vec3) { m_pos = vec3; };
+	inline void SetRot(XMFLOAT3 vec3) { m_rot = vec3; };
+	inline void SetScale(XMFLOAT3 vec3) { m_scale = vec3; };
 protected:
 	UINT mstride;
 	UINT moffset;
@@ -19,6 +22,12 @@ protected:
 	//InitResources에 있는 중복 코드(버퍼 초기화, 버퍼 desc지정 등) 옮기도록
 	ID3D11Buffer* mVBuffer;
 	ID3D11Buffer* mIBuffer;
+	ID3D11Buffer* m_constantBuffer;
 	ID3D11RasterizerState* mWireframe;
+
+	XMFLOAT3 m_rot;
+	XMFLOAT3 m_pos;
+	XMFLOAT3 m_scale;
+	XMMATRIX m_prs;
 };
 

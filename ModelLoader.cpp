@@ -34,8 +34,13 @@ bool ModelLoader::Load(const char* path)
 
 	ret = mpImporter->Import(mpScene);
 	assert(ret);
-	auto rootNode = mpScene->GetRootNode();
 
+
+	FbxAxisSystem::DirectX.ConvertScene(mpScene);// directXAxis(FbxAxisSystem::EUpVector::eYAxis, FbxAxisSystem::EFrontVector::eParityEven, FbxAxisSystem::eLeftHanded);
+
+	//directXAxis.ConvertScene(mpScene);
+
+	auto rootNode = mpScene->GetRootNode();
 	assert(rootNode);
 
 	for (int i = 0; i < rootNode->GetChildCount(); i++)

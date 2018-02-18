@@ -60,16 +60,27 @@ Model::Model(const char * fileName)
 	//D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
 	//D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
 
+	D3D11_BUFFER_DESC cbbd;
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+
+	cbbd.Usage = D3D11_USAGE_DEFAULT;
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.ByteWidth = sizeof(DirectX::XMMATRIX);
+	cbbd.CPUAccessFlags = 0;
+	cbbd.MiscFlags = 0;
+
+	assert(SUCCEEDED(D3D::device->CreateBuffer(&cbbd, NULL, &m_constantBuffer)));
 }
 
-Model::Model():
-	mVBuffer(nullptr), 
+Model::Model() :
+	mVBuffer(nullptr),
 	mIBuffer(nullptr),
 	mstride(0),
 	moffset(0),
 	mindexCount(0),
 	mWireframe(nullptr),
-	mSetwireframe(false)
+	mSetwireframe(false),
+	m_constantBuffer(nullptr)
 {
 	mloader.Init();
 }
@@ -81,13 +92,14 @@ Model::~Model()
 void Model::Update(float delta) const
 {
 
+	//D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL,)
 }
 
 void Model::Draw() const
 {
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &mstride, &moffset);
 	D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
-
+	//D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 	if (mSetwireframe)
 	{
 		D3D::deviceContext->RSSetState(mWireframe);
@@ -99,3 +111,4 @@ void Model::Draw() const
 		D3D::deviceContext->RSSetState(0);
 	}
 }
+

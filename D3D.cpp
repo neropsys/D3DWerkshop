@@ -283,7 +283,8 @@ void D3D::Cleanup()
 void D3D::Render(float delta)
 {
 	if (!isInitialized) return;
-	Resources::DrawResources();
+	
+	//Resources::DrawResources();
 
 
 

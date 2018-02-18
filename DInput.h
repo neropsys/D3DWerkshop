@@ -8,6 +8,7 @@ public:
 	static void Release();
 	static void Reset();
 	static void Update(double time);
+	static void Input(float time);
 	inline static const bool GetKeyboardState(int keycode) { 
 		if (keycode >= 256 || keycode < 0) return false;
 		return mKeyboardState[keycode] & 0x80;
