@@ -36,9 +36,16 @@ bool ModelLoader::Load(const char* path)
 	assert(ret);
 
 
-	FbxAxisSystem::DirectX.ConvertScene(mpScene);// directXAxis(FbxAxisSystem::EUpVector::eYAxis, FbxAxisSystem::EFrontVector::eParityEven, FbxAxisSystem::eLeftHanded);
+	//FbxAxisSystem::DirectX.ConvertScene(mpScene);// directXAxis(FbxAxisSystem::EUpVector::eYAxis, FbxAxisSystem::EFrontVector::eParityEven, FbxAxisSystem::eLeftHanded);
 
-	//directXAxis.ConvertScene(mpScene);
+	FbxAxisSystem directX = FbxAxisSystem::DirectX;
+	auto sceneAxis = mpScene->GetGlobalSettings().GetAxisSystem();
+
+	bool isDxAxis = true;
+	if (directX != sceneAxis)
+	{
+		isDxAxis = false;
+	}// todo: need switch case for different axis
 
 	auto rootNode = mpScene->GetRootNode();
 	assert(rootNode);
@@ -74,7 +81,11 @@ bool ModelLoader::Load(const char* path)
 			{
 				int controlPtIndex = mesh->GetPolygonVertex(polygon, polygonVert);
 				auto fbxVertex = vert[controlPtIndex].mData;
-				Vertex vertex(fbxVertex[0], fbxVertex[1], fbxVertex[2]);
+				Vertex vertex(fbxVertex[0], fbxVertex[1], fbxVertex[2]); // switch y and z to properly align
+				if (isDxAxis == false)
+				{
+					vertex.pos = XMFLOAT3(fbxVertex[0], fbxVertex[2], fbxVertex[1]);
+				}
 				vertex.cpIndex = controlPtIndex;
 
 				mVertices.emplace_back(vertex);
@@ -82,11 +93,11 @@ bool ModelLoader::Load(const char* path)
 			}
 		}
 	}
-	assert((mIndices.size() % 3) == 0);
-	for (auto it = mIndices.begin(); it != mIndices.end(); it += 3)
-	{
-		std::swap(*it, *(it + 2));
-	}
+// 	assert((mIndices.size() % 3) == 0);
+// 	for (auto it = mIndices.begin(); it != mIndices.end(); it += 3)
+// 	{
+// 		std::swap(*it, *(it + 2));
+// 	}
 
 	return true;
 
