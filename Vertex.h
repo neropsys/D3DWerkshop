@@ -9,6 +9,7 @@ struct Vertex
 	{}
 	XMFLOAT4 color;
 	UINT cpIndex;
+	Vertex(XMFLOAT3 input, XMFLOAT4 in_color = XMFLOAT4(1, 0, 0, 1)) :pos(input), color(in_color), cpIndex(0) {}
 	Vertex(float x, float y, float z, float r, float g, float b, float a)
 		: pos(x, y, z), color(r, g, b, a), cpIndex(0)
 	{}

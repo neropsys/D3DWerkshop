@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "VertexLayout.h"
 #include "DInput.h"
+#include "Gizmo.h"
 namespace D3D {
 	extern ID3D11Device* device;
 	extern ID3D11DeviceContext* deviceContext;
@@ -14,6 +15,11 @@ Scene::Scene():
 	m_inputLayout(nullptr)
 {
 
+}
+
+Scene::~Scene()
+{
+	
 }
 
 void Scene::Init()
@@ -30,10 +36,10 @@ void Scene::Init()
 	UINT numElements = ARRAYSIZE(vertexLayout);
 	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
 
-	auto model = Model("2B.fbx");
 	//model.
 
-	m_models.emplace_back(model);
+	m_models.emplace_back(std::move(new Model("2B.fbx")));
+	m_models.emplace_back(std::move(new Gizmo()));
 
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -58,7 +64,7 @@ void Scene::Update(float delta)
 
 		for (const auto& it : m_models)
 		{
-			it.Update(delta);
+			it->Update(delta);
 		}
 	
 }
@@ -72,7 +78,7 @@ void Scene::Draw()
 	D3D::deviceContext->PSSetShader(m_pixelShader, 0, 0);
 	for (const auto& it : m_models)
 	{
-		it.Draw();
+		it->Draw();
 	}
 }
 

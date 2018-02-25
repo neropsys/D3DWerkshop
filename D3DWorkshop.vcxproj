@@ -142,11 +142,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseModel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="D3DWorkshop.h" />
     <ClInclude Include="DInput.h" />
+    <ClInclude Include="Gizmo.h" />
     <ClInclude Include="GraphicResources.h" />
+    <ClInclude Include="IRender.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Resource.h" />
@@ -158,10 +161,12 @@
     <ClInclude Include="VertexLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseModel.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="D3DWorkshop.cpp" />
     <ClCompile Include="DInput.cpp" />
+    <ClCompile Include="Gizmo.cpp" />
     <ClCompile Include="GraphicResources.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLoader.cpp" />

@@ -1,13 +1,14 @@
 #pragma once
 #include "ModelLoader.h"
-class Model
+#include "IRender.h"
+class Model : public IRender
 {
 public:
 	Model(const char* fileName);
 	Model();
 	~Model();
-	void Update(float delta) const;
-	void Draw() const;
+	void Update(float delta) const override;
+	void Draw() const override;
 	inline void SetPos(XMFLOAT3 vec3) { m_pos = vec3; };
 	inline void SetRot(XMFLOAT3 vec3) { m_rot = vec3; };
 	inline void SetScale(XMFLOAT3 vec3) { m_scale = vec3; };

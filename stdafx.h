@@ -23,3 +23,5 @@
 #include <assert.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+#define _USE_MATH_DEFINES
+#include <math.h>

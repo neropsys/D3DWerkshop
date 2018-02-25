@@ -3,15 +3,18 @@
 #include <memory>
 #include "Model.h"
 #include "Camera.h"
+#include "IRender.h"
+#include <memory>
 class Scene {
 
 public:
 	Scene();
+	~Scene();
 	void Init();
 	void Update(float delta);
 	void Draw();
 protected:
-	std::vector<Model> m_models;
+	std::vector<std::unique_ptr<IRender>> m_models;
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;
 	ID3D11Buffer* m_constantBuffer;
