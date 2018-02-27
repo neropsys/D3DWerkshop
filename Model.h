@@ -8,10 +8,16 @@ public:
 	Model();
 	~Model();
 	void Update(float delta) const override;
-	void Draw() const override;
+	void Draw() override;
 	inline void SetPos(XMFLOAT3 vec3) { m_pos = vec3; };
 	inline void SetRot(XMFLOAT3 vec3) { m_rot = vec3; };
 	inline void SetScale(XMFLOAT3 vec3) { m_scale = vec3; };
+
+
+
+	virtual void SetViewProj(const DirectX::XMMATRIX& ref) override;
+
+	//virtual inline  void SetViewProj(const XMMATRIX& viewProj) { m_viewProj = viewProj; };
 protected:
 	UINT mstride;
 	UINT moffset;
@@ -29,6 +35,7 @@ protected:
 	XMFLOAT3 m_rot;
 	XMFLOAT3 m_pos;
 	XMFLOAT3 m_scale;
-	XMMATRIX m_prs;
+	XMMATRIX m_world = XMMatrixIdentity();
+	XMMATRIX m_viewProj = XMMatrixIdentity();
 };
 

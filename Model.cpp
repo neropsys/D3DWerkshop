@@ -65,7 +65,7 @@ Model::Model(const char * fileName)
 
 	cbbd.Usage = D3D11_USAGE_DEFAULT;
 	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbbd.ByteWidth = sizeof(DirectX::XMMATRIX);
+	cbbd.ByteWidth = sizeof(D3D::cbPerObject);
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
 
@@ -80,7 +80,8 @@ Model::Model() :
 	mindexCount(0),
 	mWireframe(nullptr),
 	mSetwireframe(false),
-	m_constantBuffer(nullptr)
+	m_constantBuffer(nullptr),
+	m_world(XMMatrixIdentity())
 {
 	mloader.Init();
 }
@@ -91,15 +92,17 @@ Model::~Model()
 
 void Model::Update(float delta) const
 {
-
-	//D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL,)
+	auto ret = m_world * m_viewProj;
+	D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &XMMatrixTranspose(ret), 0, 0);
 }
 
-void Model::Draw() const
+void Model::Draw() 
 {
+
+	
+	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &mstride, &moffset);
 	D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
-	//D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 	if (mSetwireframe)
 	{
 		D3D::deviceContext->RSSetState(mWireframe);
@@ -110,5 +113,10 @@ void Model::Draw() const
 	{
 		D3D::deviceContext->RSSetState(0);
 	}
+}
+
+void Model::SetViewProj(const DirectX::XMMATRIX& ref)
+{
+	m_viewProj = ref;
 }
 

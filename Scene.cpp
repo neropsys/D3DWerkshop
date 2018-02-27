@@ -38,8 +38,9 @@ void Scene::Init()
 
 	//model.
 
-	m_models.emplace_back(std::move(new Model("2B.fbx")));
+	m_models.emplace_back(std::move(new Model("Knuckles_meme\\Knuckles.fbx")));
 	m_models.emplace_back(std::move(new Gizmo()));
+
 
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -55,15 +56,12 @@ void Scene::Init()
 
 void Scene::Update(float delta)
 {
-	//if (DInput::GetKeyboardState(DIK_W))
-	//{
 		g_cam->Update(delta);
-	//}
-	D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &g_cam->getConstantBufferObj(), 0, 0);
-	//D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, )
+
 
 		for (const auto& it : m_models)
 		{
+			it->SetViewProj(g_cam->getViewProj());
 			it->Update(delta);
 		}
 	
@@ -73,7 +71,6 @@ void Scene::Draw()
 {
 	D3D::deviceContext->IASetInputLayout(m_inputLayout);
 	D3D::deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 	D3D::deviceContext->VSSetShader(m_vertexShader, 0, 0);
 	D3D::deviceContext->PSSetShader(m_pixelShader, 0, 0);
 	for (const auto& it : m_models)

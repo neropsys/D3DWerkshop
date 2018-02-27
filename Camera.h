@@ -8,18 +8,16 @@ public:
 
 	Camera(int width, int height);
 	void Update(double delta);
-	inline const D3D::cbPerObject getConstantBufferObj() { return cbPerObj; };
+	inline const DirectX::XMMATRIX getViewProj() { return m_view * m_proj; };
 	~Camera();
 
 private:
 	Camera();
-	D3D::cbPerObject cbPerObj;
-	DirectX::XMMATRIX world;
-	DirectX::XMMATRIX view;
-	DirectX::XMMATRIX proj;
-	DirectX::XMMATRIX wvp;
+	DirectX::XMMATRIX m_view;
+	DirectX::XMMATRIX m_proj;
 
-	DirectX::XMVECTOR camPos;
-	DirectX::XMVECTOR camTarget;
-	DirectX::XMVECTOR camUp;
+
+	DirectX::XMVECTOR m_pos;
+	DirectX::XMVECTOR m_target;
+	DirectX::XMVECTOR m_up;
 };

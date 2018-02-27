@@ -3,14 +3,13 @@
 #include <math.h>
 #include "DInput.h"
 Camera::Camera(int width, int height) :
-	camPos(DirectX::XMVectorSet(0.f, 0.f, -1.f, 0.0f)),
-	camTarget(DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f)),
-	camUp(DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f)),
+	m_pos(DirectX::XMVectorSet(0.f, 0.f, 1.f, 0.0f)),
+	m_target(DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f)),
+	m_up(DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f)),
 	
-	proj(DirectX::XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f)),
-	world(DirectX::XMMatrixIdentity())
+	m_proj(DirectX::XMMatrixPerspectiveFovLH(0.4f*3.14f, (float)width / height, 1.0f, 1000.0f))
 {
-	view = DirectX::XMMatrixLookAtLH(camPos, camTarget, camUp);
+	m_view = DirectX::XMMatrixLookAtLH(m_pos, m_target, m_up);
 }
 
 Camera::~Camera()
@@ -21,39 +20,40 @@ void Camera::Update(double delta)
 	static double timeDelta = (double)timeGetTime();
 	timeDelta += (double)timeGetTime()* 0.0007f;
 	timeDelta = sin(timeDelta);
-	world = DirectX::XMMatrixRotationRollPitchYaw(0, timeDelta, 0);// ¸ðµ¨¿¡¼­µµ ÇØÁà¾ßÇÔ.
+
 	auto identityMatrix = DirectX::XMMatrixIdentity();
 	static float x = 0.f;
 	static float y = 0.f;
-	static float z = 0.f;
+	static float z = 1.f;
 	float mult = .01f;
 	if (DInput::GetKeyboardState(DIK_W))
 	{
-		z += mult;
+		z -= mult;
 	}
 	if (DInput::GetKeyboardState(DIK_S))
 	{
-		z -= mult;
+		z += mult;
 	}
 	if (DInput::GetKeyboardState(DIK_A))
 	{
-		x -= mult;
+		x += mult;
 	}
 	if (DInput::GetKeyboardState(DIK_D))
 	{
-		x += mult;
+		x -= mult;
 	}
 	if (DInput::GetKeyboardState(DIK_Q))
 	{
-		y += mult;
+		y -= mult;
 	}
 	if (DInput::GetKeyboardState(DIK_E))
 	{
-		y -= mult;
+		y += mult;
 	}
-	world *= DirectX::XMMatrixTranslation(x, y, z);
 
+	m_pos = DirectX::XMVectorSet(x, y, z, 0.f);
+	
+	m_target = DirectX::XMVectorSet(x, y, z-1, .0f);
+	m_view = DirectX::XMMatrixLookAtLH(m_pos, m_target, m_up);
 
-	wvp = world * view * proj;
-	cbPerObj.WVP = DirectX::XMMatrixTranspose(wvp);
 }

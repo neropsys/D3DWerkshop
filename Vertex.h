@@ -3,10 +3,11 @@
 using namespace DirectX;
 struct Vertex
 {
-	XMFLOAT3 pos;
 	Vertex(float x, float y, float z)
 		: pos(x, y, z), color(1.f, 0.f, 0.f, 1.f), cpIndex(0)
 	{}
+	XMFLOAT3 pos;
+
 	XMFLOAT4 color;
 	UINT cpIndex;
 	Vertex(XMFLOAT3 input, XMFLOAT4 in_color = XMFLOAT4(1, 0, 0, 1)) :pos(input), color(in_color), cpIndex(0) {}

@@ -142,6 +142,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrowMesh.h" />
     <ClInclude Include="BaseModel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="D3D.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="VertexLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArrowMesh.cpp" />
     <ClCompile Include="BaseModel.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="D3D.cpp" />
