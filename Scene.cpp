@@ -4,7 +4,6 @@
 #include "DInput.h"
 #include "Gizmo.h"
 #include "imgui.h"
-#include "imgui_impl_dx11.h"
 namespace D3D {
 	extern ID3D11Device* device;
 	extern ID3D11DeviceContext* deviceContext;
@@ -79,5 +78,7 @@ void Scene::Draw()
 	{
 		it->Draw();
 	}
+	ImGui::Text("Hello, world!");
+
 }
 

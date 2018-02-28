@@ -9,6 +9,8 @@
 #include "Camera.h"
 #include <memory>
 #include "DInput.h"
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
 #define MAX_LOADSTRING 100
 
 Scene g_scene;
@@ -58,6 +60,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		else
 		{
+			ImGui_ImplDX11_NewFrame();
+
 			static double lastTime = (double)timeGetTime();
 			double currTime = (double)timeGetTime();
 			double timeDelta = (currTime - lastTime) * 0.0007;
@@ -68,6 +72,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			D3D::BeginScene();
 			g_scene.Draw();
 			D3D::Render(timeDelta);
+
+			ImGui::Render();
+			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 			D3D::EndScene();
 			lastTime = currTime;
 			DInput::Reset();
@@ -121,18 +128,21 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, 1280, 720, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
       return FALSE;
    }
    RECT rect;
-   GetWindowRect(hWnd, &rect);//todo: get width height properly
+   GetClientRect(hWnd, &rect);//todo: get width height properly
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
-   D3D::InitD3D(hInstance, 1280, 720, hWnd);
+   D3D::InitD3D(hInstance, rect.right - rect.left, rect.bottom - rect.top, hWnd);
+   ImGui::CreateContext();
+   ImGuiIO& io = ImGui::GetIO(); (void)io;
+   ImGui_ImplDX11_Init(hWnd, D3D::device, D3D::deviceContext);
    DInput::Init(hInst, hWnd);
    g_scene.Init();
    
@@ -149,8 +159,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - post a quit message and return
 //
 //
+
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+		return true;
+
     switch (message)
     {
     case WM_COMMAND:
@@ -163,8 +178,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
             case IDM_EXIT:
+				ImGui_ImplDX11_Shutdown();
 				D3D::Cleanup();
 				DInput::Release();
+
                 DestroyWindow(hWnd);
                 break;
             default:
