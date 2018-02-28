@@ -3,6 +3,8 @@
 #include "VertexLayout.h"
 #include "DInput.h"
 #include "Gizmo.h"
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
 namespace D3D {
 	extern ID3D11Device* device;
 	extern ID3D11DeviceContext* deviceContext;
@@ -37,9 +39,9 @@ void Scene::Init()
 	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
 
 	//model.
-
-	m_models.emplace_back(std::move(new Model("Knuckles_meme\\Knuckles.fbx")));
+//	m_models.emplace_back(std::move(new Model("Knuckles_meme\\Knuckles.fbx")));
 	m_models.emplace_back(std::move(new Gizmo()));
+
 
 
 	D3D11_BUFFER_DESC cbbd;

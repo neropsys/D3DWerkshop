@@ -4,6 +4,7 @@
 #include <vector>
 #include "D3D.h"
 #include "ArrowMesh.h"
+
 Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()), m_viewProj(XMMatrixIdentity())
 {
 	using namespace DirectX;
@@ -13,15 +14,12 @@ Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()
 	ArrowMesh yAxis(ArrowMesh::Y);
 	ArrowMesh zAxis(ArrowMesh::Z);
 	m_vertice.insert(m_vertice.end(), xAxis.GetVertice().begin(), xAxis.GetVertice().end());
-	m_vertice.insert(std::end(m_vertice), std::begin(yAxis.GetVertice()), std::end(yAxis.GetVertice()));
-	m_vertice.insert(std::end(m_vertice), std::begin(zAxis.GetVertice()), std::end(zAxis.GetVertice()));
-
+	m_vertice.insert(m_vertice.end(), yAxis.GetVertice().begin(), yAxis.GetVertice().end());
+	m_vertice.insert(m_vertice.end(), zAxis.GetVertice().begin(), zAxis.GetVertice().end());
 
 	m_indice.insert(m_indice.end(), xAxis.GetIndice().begin(), xAxis.GetIndice().end());
-	m_indice.insert(m_indice.end(), yAxis.GetIndice().begin(), yAxis.GetIndice().end());
-	m_indice.insert(m_indice.end(), zAxis.GetIndice().begin(), zAxis.GetIndice().end());
-	m_indiceSize = xAxis.GetIndice().size();
 	
+	m_indiceSize = xAxis.GetIndice().size();
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 
@@ -65,8 +63,7 @@ Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()
 	cbbd.MiscFlags = 0;
 
 	assert(SUCCEEDED(D3D::device->CreateBuffer(&cbbd, NULL, &m_constantBuffer)));
-	//m_world *= XMMatrixRotationY(1.5708f);// * XMMatrixScaling(1, 1, 1);
-
+	
 }
 
 Gizmo::~Gizmo()
@@ -82,33 +79,30 @@ void Gizmo::Update(float delta) const
 void Gizmo::Draw()
 {
 
-
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &m_stride, &m_offset);
 	D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
 	{//x axis
+
 		auto wvp =  XMMatrixRotationY(XMConvertToRadians(90)) * m_viewProj;
 		D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &XMMatrixTranspose(wvp), 0, 0);
 		D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
-		D3D::deviceContext->DrawIndexed(m_indiceSize, 0, 0);
+		D3D::deviceContext->DrawIndexed (m_indiceSize, 0, 0);
 
 	}
 	
 
 	{//y axis
 		auto wvp =  XMMatrixRotationX(XMConvertToRadians(-90)) * m_viewProj;
+
 		D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &XMMatrixTranspose(wvp), 0, 0);
-		//D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
-		D3D::deviceContext->DrawIndexed(m_indiceSize, m_indiceSize, 0);
+		D3D::deviceContext->DrawIndexed(m_indiceSize, 0, m_vertice.size()/3);
 
 	}
 	{//z axis
 		auto wvp =  m_viewProj;
 		D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &XMMatrixTranspose(wvp), 0, 0);
-	//	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
-		D3D::deviceContext->DrawIndexed(m_indiceSize, m_indiceSize * 2, 0);
+		D3D::deviceContext->DrawIndexed(m_indiceSize, 0, m_vertice.size()/3*2);
 	}
-
-	//D3D::deviceContext->DrawIndexed(m_indice.size(), 0, 0);
 }
 
 void Gizmo::SetViewProj(const DirectX::XMMATRIX& ref)

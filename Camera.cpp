@@ -25,7 +25,7 @@ void Camera::Update(double delta)
 	static float x = 0.f;
 	static float y = 0.f;
 	static float z = 1.f;
-	float mult = .01f;
+	float mult = .001f;
 	if (DInput::GetKeyboardState(DIK_W))
 	{
 		z -= mult;
@@ -51,9 +51,20 @@ void Camera::Update(double delta)
 		y += mult;
 	}
 
+	static float right = .0f;
+	if (DInput::GetKeyboardState(DIK_K))
+	{
+		right += mult;
+	}
+	if (DInput::GetKeyboardState(DIK_J))
+	{
+		right -= mult;
+	}
 	m_pos = DirectX::XMVectorSet(x, y, z, 0.f);
 	
 	m_target = DirectX::XMVectorSet(x, y, z-1, .0f);
+// 	m_target = DirectX::XMVectorAdd(m_target, 
+// 		DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(0, 1, 0, 0), DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(right))));
 	m_view = DirectX::XMMatrixLookAtLH(m_pos, m_target, m_up);
 
 }

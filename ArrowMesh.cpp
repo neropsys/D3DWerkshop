@@ -56,7 +56,7 @@ ArrowMesh::ArrowMesh(DIRECTION dir) :m_dir(X)
 
 		float coneOffsetY = cylinderHeight;
 		float coneHeight = m_magnitude - cylinderHeight + offset;
-		float coneRadius = m_magnitude * .05;
+		float coneRadius = m_magnitude * .05f;
 
 		XMFLOAT3 conePos[18];
 
