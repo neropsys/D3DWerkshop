@@ -15,8 +15,8 @@ public:
 	virtual void SetViewProj(const DirectX::XMMATRIX& ref) override;
 
 protected:
-	ID3D11Buffer * mVBuffer;
-	ID3D11Buffer* mIBuffer;
+	ID3D11Buffer * m_VBuffer;
+	ID3D11Buffer* m_IBuffer;
 	ID3D11Buffer* m_constantBuffer;
 	UINT m_stride;
 	UINT m_offset;

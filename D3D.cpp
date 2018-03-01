@@ -279,13 +279,3 @@ void D3D::Cleanup()
 	Release(depthStencilBuffer);
 	Release(depthStencilView);
 }
-
-void D3D::Render(float delta)
-{
-	if (!isInitialized) return;
-	
-	//Resources::DrawResources();
-
-
-
-}

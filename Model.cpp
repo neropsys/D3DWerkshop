@@ -28,13 +28,13 @@ Model::Model(const char * fileName)
 
 	vertexBufferData.pSysMem = &mloader.GetVertexList().data()[0];
 
-	auto hr = D3D::device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mVBuffer);
+	auto hr = D3D::device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_VBuffer);
 	assert(SUCCEEDED(hr));
 
-	mstride = sizeof(Vertex);
-	moffset = 0;
+	m_stride = sizeof(Vertex);
+	m_offset = 0;
 
-	mindexCount = mloader.GetIndexCount();
+	m_indexCount = mloader.GetIndexCount();
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
@@ -48,14 +48,14 @@ Model::Model(const char * fileName)
 	ZeroMemory(&initData, sizeof(initData));
 	initData.pSysMem = mloader.GetIndexList().data();
 
-	hr = D3D::device->CreateBuffer(&indexBufferDesc, &initData, &mIBuffer);
+	hr = D3D::device->CreateBuffer(&indexBufferDesc, &initData, &m_IBuffer);
 	assert(SUCCEEDED(hr));
 
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
 	desc.FillMode = D3D11_FILL_WIREFRAME;
 	desc.CullMode = D3D11_CULL_NONE;
-	hr = D3D::device->CreateRasterizerState(&desc, &mWireframe);
+	hr = D3D::device->CreateRasterizerState(&desc, &m_wireframe);
 	assert(SUCCEEDED(hr));
 	//D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
 	//D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -73,13 +73,13 @@ Model::Model(const char * fileName)
 }
 
 Model::Model() :
-	mVBuffer(nullptr),
-	mIBuffer(nullptr),
-	mstride(0),
-	moffset(0),
-	mindexCount(0),
-	mWireframe(nullptr),
-	mSetwireframe(false),
+	m_VBuffer(nullptr),
+	m_IBuffer(nullptr),
+	m_stride(0),
+	m_offset(0),
+	m_indexCount(0),
+	m_wireframe(nullptr),
+	m_setwireframe(false),
 	m_constantBuffer(nullptr),
 	m_world(XMMatrixIdentity())
 {
@@ -88,7 +88,13 @@ Model::Model() :
 
 
 Model::~Model()
-{}
+{
+	using namespace D3D;
+	Release(m_VBuffer);
+	Release(m_IBuffer);
+	Release(m_constantBuffer);
+	Release(m_wireframe);
+}
 
 void Model::Update(float delta) const
 {
@@ -101,15 +107,15 @@ void Model::Draw()
 
 	
 	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
-	D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &mstride, &moffset);
-	D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
-	if (mSetwireframe)
+	D3D::deviceContext->IASetVertexBuffers(0, 1, &m_VBuffer, &m_stride, &m_offset);
+	D3D::deviceContext->IASetIndexBuffer(m_IBuffer, DXGI_FORMAT_R32_UINT, 0);
+	if (m_setwireframe)
 	{
-		D3D::deviceContext->RSSetState(mWireframe);
+		D3D::deviceContext->RSSetState(m_wireframe);
 	}
 
-	D3D::deviceContext->DrawIndexed(mindexCount, 0, 0);
-	if (mSetwireframe)
+	D3D::deviceContext->DrawIndexed(m_indexCount, 0, 0);
+	if (m_setwireframe)
 	{
 		D3D::deviceContext->RSSetState(0);
 	}

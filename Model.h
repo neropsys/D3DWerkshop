@@ -19,18 +19,18 @@ public:
 
 	//virtual inline  void SetViewProj(const XMMATRIX& viewProj) { m_viewProj = viewProj; };
 protected:
-	UINT mstride;
-	UINT moffset;
-	UINT mindexCount;
+	UINT m_stride;
+	UINT m_offset;
+	UINT m_indexCount;
 	ModelLoader mloader;
-	bool mSetwireframe;;
+	bool m_setwireframe;;
 	//한 버퍼에 다 때려박아서 버퍼 스위칭 줄이는것도 고려해야함.
 	//일단 모델별로 버퍼 하나씩 할당
 	//InitResources에 있는 중복 코드(버퍼 초기화, 버퍼 desc지정 등) 옮기도록
-	ID3D11Buffer* mVBuffer;
-	ID3D11Buffer* mIBuffer;
+	ID3D11Buffer* m_VBuffer;
+	ID3D11Buffer* m_IBuffer;
 	ID3D11Buffer* m_constantBuffer;
-	ID3D11RasterizerState* mWireframe;
+	ID3D11RasterizerState* m_wireframe;
 
 	XMFLOAT3 m_rot;
 	XMFLOAT3 m_pos;

@@ -14,6 +14,7 @@ public:
 	void Update(float delta);
 	void Draw();
 protected:
+
 	std::vector<std::unique_ptr<IRender>> m_models;
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;

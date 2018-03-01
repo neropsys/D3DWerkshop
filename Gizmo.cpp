@@ -34,7 +34,7 @@ Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()
 
 	vertexBufferData.pSysMem = &m_vertice.data()[0];
 
-	auto hr = D3D::device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mVBuffer);
+	auto hr = D3D::device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_VBuffer);
 	assert(SUCCEEDED(hr));
 
 
@@ -50,7 +50,7 @@ Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()
 	ZeroMemory(&initData, sizeof(initData));
 	initData.pSysMem = m_indice.data();
 
-	hr = D3D::device->CreateBuffer(&indexBufferDesc, &initData, &mIBuffer);
+	hr = D3D::device->CreateBuffer(&indexBufferDesc, &initData, &m_IBuffer);
 	assert(SUCCEEDED(hr));
 
 	D3D11_BUFFER_DESC cbbd;
@@ -68,6 +68,10 @@ Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()
 
 Gizmo::~Gizmo()
 {
+	using namespace D3D;
+	Release(m_VBuffer);
+	Release(m_IBuffer);
+	Release(m_constantBuffer);
 
 }
 
@@ -79,8 +83,8 @@ void Gizmo::Update(float delta) const
 void Gizmo::Draw()
 {
 
-	D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &m_stride, &m_offset);
-	D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
+	D3D::deviceContext->IASetVertexBuffers(0, 1, &m_VBuffer, &m_stride, &m_offset);
+	D3D::deviceContext->IASetIndexBuffer(m_IBuffer, DXGI_FORMAT_R32_UINT, 0);
 	{//x axis
 
 		auto wvp =  XMMatrixRotationY(XMConvertToRadians(90)) * m_viewProj;

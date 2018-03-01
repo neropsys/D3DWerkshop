@@ -4,6 +4,7 @@
 #include "DInput.h"
 #include "Gizmo.h"
 #include "imgui.h"
+#include <string>
 namespace D3D {
 	extern ID3D11Device* device;
 	extern ID3D11DeviceContext* deviceContext;
@@ -20,7 +21,11 @@ Scene::Scene():
 
 Scene::~Scene()
 {
-	
+	using namespace D3D;
+	Release(m_vertexShader);
+	Release(m_pixelShader);
+	Release(m_constantBuffer);
+	Release(m_inputLayout);
 }
 
 void Scene::Init()
@@ -38,7 +43,7 @@ void Scene::Init()
 	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
 
 	//model.
-//	m_models.emplace_back(std::move(new Model("Knuckles_meme\\Knuckles.fbx")));
+	m_models.emplace_back(std::move(new Model("2B.fbx")));
 	m_models.emplace_back(std::move(new Gizmo()));
 
 
@@ -78,7 +83,6 @@ void Scene::Draw()
 	{
 		it->Draw();
 	}
-	ImGui::Text("Hello, world!");
 
 }
 

@@ -17,9 +17,6 @@ Camera::~Camera()
 }
 void Camera::Update(double delta)
 {
-	static double timeDelta = (double)timeGetTime();
-	timeDelta += (double)timeGetTime()* 0.0007f;
-	timeDelta = sin(timeDelta);
 
 	auto identityMatrix = DirectX::XMMatrixIdentity();
 	static float x = 0.f;

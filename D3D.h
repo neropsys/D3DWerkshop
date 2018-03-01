@@ -43,5 +43,4 @@ namespace D3D {
 	void BeginScene();
 	void EndScene();
 	void Cleanup();
-	void Render(float delta);
 }

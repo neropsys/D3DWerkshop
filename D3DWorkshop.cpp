@@ -11,6 +11,50 @@
 #include "DInput.h"
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
+
+
+void StartTimer();
+double GetTime();
+double GetFrameTime();
+__int64 g_frameTimeOld = 0;
+double g_frameTime = 0;
+int g_frameCount = 0;
+int g_fps = 0;
+double g_countsPerSecond = 0;
+double g_counterStart = 0;
+
+void StartTimer()
+{
+	LARGE_INTEGER frequencyCount;
+	QueryPerformanceFrequency(&frequencyCount);
+
+	g_countsPerSecond = double(frequencyCount.QuadPart);
+	QueryPerformanceCounter(&frequencyCount);
+	g_counterStart = frequencyCount.QuadPart;
+}
+
+double GetTime()
+{
+	LARGE_INTEGER currentTime;
+	QueryPerformanceCounter(&currentTime);
+	return double(currentTime.QuadPart - g_counterStart) / g_countsPerSecond;
+}
+
+double GetFrameTime()
+{
+	LARGE_INTEGER currentTime;
+	__int64 tickCount;
+	QueryPerformanceCounter(&currentTime);
+
+	tickCount = currentTime.QuadPart - g_frameTimeOld;
+	g_frameTimeOld = currentTime.QuadPart;
+
+	if (tickCount < 0.0f)
+		tickCount = 0.0f;
+
+	return float(tickCount) / g_countsPerSecond;
+}
+
 #define MAX_LOADSTRING 100
 
 Scene g_scene;
@@ -61,22 +105,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		else
 		{
 			ImGui_ImplDX11_NewFrame();
+			g_frameCount++;
+			if (GetTime() > 1.0f)
+			{
+				g_fps = g_frameCount;
+				g_frameCount = 0;
+				StartTimer();
+			}
+			g_frameTime = GetFrameTime();
+			
+			DInput::Update(g_frameTime);
 
-			static double lastTime = (double)timeGetTime();
-			double currTime = (double)timeGetTime();
-			double timeDelta = (currTime - lastTime) * 0.0007;
-
-			DInput::Update(timeDelta);
-
-			g_scene.Update(timeDelta);
+			g_scene.Update(g_frameTime);
 			D3D::BeginScene();
 			g_scene.Draw();
-			D3D::Render(timeDelta);
-
+			ImGui::Text("FPS:%d", g_fps);
 			ImGui::Render();
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 			D3D::EndScene();
-			lastTime = currTime;
 			DInput::Reset();
 		}
 	}
