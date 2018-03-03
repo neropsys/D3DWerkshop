@@ -20,4 +20,8 @@ private:
 	DirectX::XMVECTOR m_pos;
 	DirectX::XMVECTOR m_target;
 	DirectX::XMVECTOR m_up;
+	DirectX::XMVECTOR m_forward;
+	DirectX::XMVECTOR m_right;
+	float m_yaw = 0;
+	float m_pitch = 0;
 };

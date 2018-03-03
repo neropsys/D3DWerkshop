@@ -271,6 +271,7 @@ void D3D::Cleanup()
 {
 	if (swapChain)
 		swapChain->SetFullscreenState(FALSE, nullptr);
+	Release(device);
 	Release(swapChain);
 	Release(normalState);
 	Release(deviceContext);
