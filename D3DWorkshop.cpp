@@ -22,7 +22,7 @@ int g_frameCount = 0;
 int g_fps = 0;
 double g_countsPerSecond = 0;
 double g_counterStart = 0;
-
+HWND g_hWnd;
 void StartTimer()
 {
 	LARGE_INTEGER frequencyCount;
@@ -113,9 +113,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				StartTimer();
 			}
 			g_frameTime = GetFrameTime();
-			
-			DInput::Update(g_frameTime);
-
+			if (GetActiveWindow() == g_hWnd)
+			{
+				DInput::Update(g_frameTime);
+			}
 			g_scene.Update(g_frameTime);
 			D3D::BeginScene();
 			g_scene.Draw();
@@ -173,23 +174,23 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   g_hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, 1280, 720, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
+   if (!g_hWnd)
    {
       return FALSE;
    }
    RECT rect;
-   GetClientRect(hWnd, &rect);//todo: get width height properly
+   GetClientRect(g_hWnd, &rect);//todo: get width height properly
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-   D3D::InitD3D(hInstance, rect.right - rect.left, rect.bottom - rect.top, hWnd);
+   ShowWindow(g_hWnd, nCmdShow);
+   UpdateWindow(g_hWnd);
+   D3D::InitD3D(hInstance, rect.right - rect.left, rect.bottom - rect.top, g_hWnd);
    ImGui::CreateContext();
    ImGuiIO& io = ImGui::GetIO(); (void)io;
-   ImGui_ImplDX11_Init(hWnd, D3D::device, D3D::deviceContext);
-   DInput::Init(hInst, hWnd);
+   ImGui_ImplDX11_Init(g_hWnd, D3D::device, D3D::deviceContext);
+   DInput::Init(hInst, g_hWnd);
    g_scene.Init();
    
    return TRUE;

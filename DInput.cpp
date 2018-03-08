@@ -57,7 +57,7 @@ void DInput::Update(double time)
 	static DIMOUSESTATE lastState = mouseState;
 	mpKeyboard->GetDeviceState(sizeof(m_keyboardState), (LPVOID)&m_keyboardState);
 	
-	m_mouseXDelta = (float)mouseState.lX;// -lastState.lX;
-	m_mouseYDelta = (float)mouseState.lY;// -lastState.lY;
+	m_mouseXDelta += (float)mouseState.lX-lastState.lX;
+	m_mouseYDelta += (float)mouseState.lY -lastState.lY;
 	lastState = mouseState;
 }

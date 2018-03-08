@@ -43,8 +43,8 @@ void Scene::Init()
 	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
 
 	//model.
-	m_models.emplace_back(std::move(new Model("2B.fbx")));
-	m_models.emplace_back(std::move(new Gizmo()));
+	m_models.emplace_back(std::move(new Model("lantern\\lantern_obj.obj")));
+	//m_models.emplace_back(std::move(new Gizmo()));
 
 
 

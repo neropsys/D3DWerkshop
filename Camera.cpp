@@ -68,6 +68,14 @@ void Camera::Update(double delta)
 		m_pos = XMVectorSet(0.f, 0.f, -1.f, 0.0f);
 		m_target = XMVectorSet(0.f, 0.f, 0.f, 0.f);
 		m_up = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+		m_right = XMVectorSet(1, 0, 0, 0);
+		m_forward = XMVectorSet(0, 0, 1, 0);
+		m_yaw = 0;
+		m_pitch =0;
+	}
+	if (DInput::GetKeyboardState(DIK_ESCAPE))
+	{
+		PostQuitMessage(0);
 	}
 	m_yaw += DInput::MouseDeltaX() * mult;
 	m_pitch += DInput::MouseDeltaY() * mult;
