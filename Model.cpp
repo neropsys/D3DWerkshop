@@ -7,13 +7,16 @@ Model::Model(const char * fileName)
 {
 
 	Model::Model();
-	char buffer[MAX_PATH];
-	//ZeroMemory(buffer, MAX_PATH);
-	GetModuleFileName(NULL, buffer, MAX_PATH);
 
 	auto filePath = path::GetAbsPath(fileName);
+	auto delimitPos = filePath.find_last_of("\\/");
+	std::string subDir = "";
+	if(delimitPos != std::string::npos)
+	{
+		subDir = filePath.substr(0, delimitPos);
+	}
 
-	assert(mloader.Load(filePath.c_str()));
+	assert(mloader.Load(subDir.c_str(), fileName));
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
@@ -29,8 +32,13 @@ Model::Model(const char * fileName)
 	vertexBufferData.pSysMem = &mloader.GetVertexList().data()[0];
 
 	auto hr = D3D::device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &m_VBuffer);
+	
 	assert(SUCCEEDED(hr));
-
+	{
+		const char c_szName[] = "VERTEX BUFFER";
+		m_VBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 	m_stride = sizeof(Vertex);
 	m_offset = 0;
 
@@ -50,12 +58,22 @@ Model::Model(const char * fileName)
 
 	hr = D3D::device->CreateBuffer(&indexBufferDesc, &initData, &m_IBuffer);
 	assert(SUCCEEDED(hr));
-
+	{
+		const char c_szName[] = "index BUFFER";
+		m_IBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
 	desc.FillMode = D3D11_FILL_WIREFRAME;
 	desc.CullMode = D3D11_CULL_NONE;
 	hr = D3D::device->CreateRasterizerState(&desc, &m_wireframe);
+
+	{
+		const char c_szName[] = "index m_wireframe";
+		m_wireframe->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 	assert(SUCCEEDED(hr));
 	//D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
 	//D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -70,6 +88,11 @@ Model::Model(const char * fileName)
 	cbbd.MiscFlags = 0;
 
 	assert(SUCCEEDED(D3D::device->CreateBuffer(&cbbd, NULL, &m_constantBuffer)));
+	{
+		const char c_szName[] = "constant buffer";
+		m_constantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 }
 
 Model::Model() :

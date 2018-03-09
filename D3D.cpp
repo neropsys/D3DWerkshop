@@ -138,6 +138,11 @@ bool D3D::InitD3D(HINSTANCE hInst, int width, int height, HWND hwnd)
 		sd.Windowed = TRUE;
 
 		hr = dxgiFactory->CreateSwapChain(device, &sd, &swapChain);
+		{
+			const char c_szName[] = "swapchain";
+			swapChain->SetPrivateData(WKPDID_D3DDebugObjectName,
+				sizeof(c_szName) - 1, c_szName);
+		}
 	}
 
 	// Note this tutorial doesn't handle full-screen swapchains so we block the ALT+ENTER shortcut
@@ -153,10 +158,14 @@ bool D3D::InitD3D(HINSTANCE hInst, int width, int height, HWND hwnd)
 	hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
 	if (FAILED(hr))
 		return hr;
-
+	
 	hr = device->CreateRenderTargetView(pBackBuffer, nullptr, &renderTargetView);
 	pBackBuffer->Release();
-
+	{
+		const char c_szName[] = "renderTargetView";
+		renderTargetView->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 
 	//point for depth buffer
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
@@ -179,6 +188,11 @@ bool D3D::InitD3D(HINSTANCE hInst, int width, int height, HWND hwnd)
 	if (FAILED(hr)) {
 		OutputDebugStringW(L"failed to create texture for the depth buffer using description.\r\n ");
 		return false;
+	}
+	{
+		const char c_szName[] = "depthStencilBuffer";
+		depthStencilBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
 	}
 
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
@@ -210,7 +224,11 @@ bool D3D::InitD3D(HINSTANCE hInst, int width, int height, HWND hwnd)
 		OutputDebugStringW(L"Failed to create depth stencil state.\r\n ");
 		return false;
 	}
-
+	{
+		const char c_szName[] = "depthStencilState";
+		depthStencilState->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 	//set depth stencil state
 	deviceContext->OMSetDepthStencilState(depthStencilState, 1);
 
@@ -227,7 +245,11 @@ bool D3D::InitD3D(HINSTANCE hInst, int width, int height, HWND hwnd)
 		OutputDebugStringW(L"Failed to create depth stencil view. \r\n ");
 		return false;
 	}
-
+	{
+		const char c_szName[] = "depthStencilView";
+		depthStencilView->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
 
 	if (FAILED(hr))
 		return hr;

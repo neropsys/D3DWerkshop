@@ -3,7 +3,7 @@
 #include <cassert>
 #include "Vertex.h"
 #include <algorithm>
-#include <wincodec.h>
+#include "DirectXTex.h"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 ModelLoader::ModelLoader() :
@@ -32,15 +32,15 @@ void ModelLoader::Init() {
 
 }
 
-bool ModelLoader::Load(const char* path)
+bool ModelLoader::Load(const char* path, const char* basePath)
 {
-	if (strstr(path, ".fbx") != nullptr)
+	if (strstr(basePath, ".fbx") != nullptr)
 	{
 		return ParseFbx(path);
 	}
-	else if (strstr(path, ".obj") != nullptr)
+	else if (strstr(basePath, ".obj") != nullptr)
 	{
-		return ParseObj(path);
+		return ParseObj(path, basePath);
 	}
 	
 // 	assert((mIndices.size() % 3) == 0);
@@ -273,18 +273,25 @@ bool ModelLoader::ParseFbx(const char* path)
 	return true;
 }
 
-bool ModelLoader::ParseObj(const char* path)
+bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string err;
-	char buffer[MAX_PATH];
-	GetModuleFileName(NULL, buffer, MAX_PATH);
-	std::string strBuffer = buffer;
-	auto pos = strBuffer.find_last_of("\\/");
-	auto baseDir = strBuffer.substr(0, pos);
-	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, path, (baseDir+"\\lantern\\").c_str());
+	std::string fileName = basePath;
+	auto idx = fileName.find_last_of("\\");
+	if(idx != std::string::npos)
+	{
+		fileName = fileName.substr(idx+1, fileName.size());
+	}
+	std::string absPathStr = absPath;
+	std::string basePathStr = absPathStr.append("\\");
+	absPathStr.append(fileName);
+	//fullPath += "\\" + std::string(basePath);
+	//std::string absPathStr = absPath;
+	//auto idx = absPathStr.find_last_of("\\");
+	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, absPathStr.c_str(), basePathStr.c_str());
 	assert(ret);
 
 	size_t vertices = attrib.vertices.size() / 3;
@@ -326,15 +333,55 @@ bool ModelLoader::ParseObj(const char* path)
 			m_vertice[i2.vertex_index].setUV(texIndex1.x, texIndex2.y);
 		}
 	}
-
-
-// 	std::vector<vec2> texCoord;
-// 	size_t texes = attrib.texcoords.size() / 2;
-// 	for (size_t v = 0; v < texes; v++)
-// 	{
-// 		
-// 	}
-
 	m_indexCount = m_indice.size();
+
+	std::string texturePath = absPath;
+	texturePath =  texturePath.append("\\").append("textures");
+
+
+	HANDLE dir;
+	WIN32_FIND_DATA file_data;
+	std::vector<std::string> fileList;
+	if ((dir = FindFirstFile((texturePath + "/*").c_str(), &file_data)) != INVALID_HANDLE_VALUE)
+	{
+		
+		do
+		{
+			const std::string file_name = file_data.cFileName;
+			const std::string full_file_name = texturePath + "/" + file_name;
+			const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+			if (file_name[0] == '.')
+				continue;
+
+			if (is_directory)
+				continue;
+			if (file_name.find(".jpg") != std::string::npos ||
+				file_name.find(".png") != std::string::npos)
+			{
+				fileList.push_back(full_file_name);
+			}
+
+		} while (FindNextFile(dir, &file_data));
+
+		FindClose(dir);
+	}
+
+	if(fileList.empty()==false)
+	{
+
+		HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+		assert(SUCCEEDED(hr));
+			// error
+		for(const auto& it : fileList)
+		{
+			std::wstring wideStr = std::wstring(it.begin(), it.end());
+			DirectX::ScratchImage image;
+			hr = DirectX::LoadFromWICFile(wideStr.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, image);
+			assert(SUCCEEDED(hr));
+			//image.
+		}
+	}
+
 	return true;
 }

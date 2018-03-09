@@ -11,10 +11,10 @@ public:
 	ModelLoader();
 	~ModelLoader();
 	void Init();
-	bool Load(const char* path);
+	bool Load(const char* absPath, const char* basePath);
 protected:
 	bool ParseFbx(const char* path);
-	bool ParseObj(const char* path);
+	bool ParseObj(const char* absPath, const char* basePath);
 	std::vector<Vertex> m_vertice;
 	std::vector<UINT> m_indice;
 	std::vector<std::string> m_texturePaths;//map(key std::string(textureType), value std::string(texturePath)

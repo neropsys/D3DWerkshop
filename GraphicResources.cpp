@@ -70,7 +70,7 @@ namespace Resources {
 
 			ModelLoader loader;
 			loader.Init();
-			loader.Load(filePath.c_str());
+			//loader.Load(filePath.c_str());
 
 			D3D11_BUFFER_DESC vertexBufferDesc;
 			ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
