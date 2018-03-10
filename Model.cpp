@@ -93,6 +93,27 @@ Model::Model(const char * fileName)
 		m_constantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
 			sizeof(c_szName) - 1, c_szName);
 	}
+
+	if (mloader.GetTextureList().empty() == false)
+	{
+		D3D11_SAMPLER_DESC sampDesc;
+		ZeroMemory(&sampDesc, sizeof(sampDesc));
+		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.MinLOD = 0;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	
+		hr = D3D::device->CreateSamplerState(&sampDesc, &m_samplerState);
+		assert(SUCCEEDED(hr));
+		//D3D::deviceContext->PSSetShaderResources()
+// 		for (const auto& it : mloader.GetTextureList())
+// 		{
+// 		}
+	}
+
 }
 
 Model::Model() :
@@ -104,7 +125,8 @@ Model::Model() :
 	m_wireframe(nullptr),
 	m_setwireframe(false),
 	m_constantBuffer(nullptr),
-	m_world(XMMatrixIdentity())
+	m_world(XMMatrixIdentity()),
+	m_samplerState(nullptr)
 {
 	mloader.Init();
 }
@@ -117,6 +139,7 @@ Model::~Model()
 	Release(m_IBuffer);
 	Release(m_constantBuffer);
 	Release(m_wireframe);
+	Release(m_samplerState);
 }
 
 void Model::Update(float delta) const

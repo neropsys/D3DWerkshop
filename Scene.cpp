@@ -43,10 +43,10 @@ void Scene::Init()
 	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
 
 	//model.
-	m_models.emplace_back(std::move(new Model("lantern\\lantern_obj.obj")));
+	auto model = std::make_unique<Model>("lantern\\lantern_obj.obj");
+	model->SetWireFrame(false);
+	m_models.emplace_back(std::move(model));
 	//m_models.emplace_back(std::move(new Gizmo()));
-
-
 
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));

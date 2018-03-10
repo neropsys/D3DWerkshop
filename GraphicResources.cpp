@@ -138,7 +138,7 @@ namespace Resources {
 		UINT offset = 0;
 
 
-		 D3D::deviceContext->IASetVertexBuffers(0, 1, &g_triVertexBuffer, &stride, &offset);
+		 //D3D::deviceContext->IASetVertexBuffers(0, 1, &g_triVertexBuffer, &stride, &offset);
 		 D3D::deviceContext->IASetIndexBuffer(g_triIndiceBuffer, DXGI_FORMAT_R32_UINT, 0);
 		 D3D::deviceContext->DrawIndexed(indexCount, 0, 0);
 

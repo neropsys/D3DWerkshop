@@ -3,7 +3,7 @@
 #include <cassert>
 #include "Vertex.h"
 #include <algorithm>
-#include "DirectXTex.h"
+#include "D3D.h"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 ModelLoader::ModelLoader() :
@@ -17,6 +17,10 @@ ModelLoader::ModelLoader() :
 
 ModelLoader::~ModelLoader()
 {
+	for (const auto& it : m_textures)
+	{
+		it->Release();
+	}
 	//m_pSdkMgr->Destroy();
 	m_importer->Destroy(true);
 }
@@ -369,19 +373,44 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 
 	if(fileList.empty()==false)
 	{
-
-		HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
-		assert(SUCCEEDED(hr));
-			// error
+		HRESULT hr;
+// 		HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+// 		assert(SUCCEEDED(hr));
+// 			// error
 		for(const auto& it : fileList)
 		{
 			std::wstring wideStr = std::wstring(it.begin(), it.end());
-			DirectX::ScratchImage image;
-			hr = DirectX::LoadFromWICFile(wideStr.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, image);
+			
+			DirectX::ScratchImage image = LoadTexture(wideStr.c_str());
+			ID3D11ShaderResourceView* texture = nullptr;
+
+			hr = DirectX::CreateShaderResourceView(
+				D3D::device,
+				image.GetImages(),
+				image.GetImageCount(),
+				image.GetMetadata(),
+				&texture);
 			assert(SUCCEEDED(hr));
-			//image.
+			m_textures.emplace_back(texture);
+			image.Release();
+
+			return true;//load only one temporaily
 		}
 	}
 
 	return true;
+}
+
+DirectX::ScratchImage ModelLoader::LoadTexture(const wchar_t* fileName)
+{
+	HRESULT hr;
+	wchar_t ext[_MAX_EXT];
+	DirectX::ScratchImage ret;
+	_wsplitpath_s(fileName, nullptr, 0, nullptr, 0, nullptr, 0, ext, _MAX_EXT);
+	//todo:: switch case by file extension
+
+	hr = DirectX::LoadFromWICFile(fileName, DirectX::WIC_FLAGS_NONE, nullptr, ret);
+	assert(SUCCEEDED(hr));
+	return ret;
+
 }

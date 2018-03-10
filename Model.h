@@ -1,7 +1,7 @@
 #pragma once
 #include "ModelLoader.h"
 #include "IRender.h"
-class Model : public IRender
+class Model : public IRender, public IRenderWireFrame
 {
 public:
 	Model(const char* fileName);
@@ -12,7 +12,7 @@ public:
 	inline void SetPos(XMFLOAT3 vec3) { m_pos = vec3; };
 	inline void SetRot(XMFLOAT3 vec3) { m_rot = vec3; };
 	inline void SetScale(XMFLOAT3 vec3) { m_scale = vec3; };
-
+	inline void SetWireFrame(bool setWireframe) override{ m_setwireframe = setWireframe; }
 
 
 	virtual void SetViewProj(const DirectX::XMMATRIX& ref) override;
@@ -31,6 +31,7 @@ protected:
 	ID3D11Buffer* m_IBuffer;
 	ID3D11Buffer* m_constantBuffer;
 	ID3D11RasterizerState* m_wireframe;
+	ID3D11SamplerState* m_samplerState;
 
 	XMFLOAT3 m_rot;
 	XMFLOAT3 m_pos;

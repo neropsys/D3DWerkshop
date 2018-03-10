@@ -13,7 +13,7 @@ struct Vertex
 	Vertex(float x, float y, float z, float r, float g, float b = 0.f, float a = 0.f)
 		: pos(x, y, z), color(r, g, b, a)
 	{}
-	void setUV(float x, float y) { color.x = x; color.y = y; }
+	void setUV(float x, float y) { color.x = x; color.y = y; color.w = 0.f; } //w는 텍스쳐인지 확인용
 	bool Vertex::operator==(const Vertex& rh) const
 	{
 		if (pos.x == rh.pos.x &&
