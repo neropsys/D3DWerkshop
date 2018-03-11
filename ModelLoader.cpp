@@ -19,7 +19,7 @@ ModelLoader::~ModelLoader()
 {
 	for (const auto& it : m_textures)
 	{
-		it->Release();
+		it.second->Release();
 	}
 	//m_pSdkMgr->Destroy();
 	m_importer->Destroy(true);
@@ -317,7 +317,7 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 	{
 		uvContainer.emplace_back(
 			attrib.texcoords[2 * v], 
-			attrib.texcoords[2 * v + 1]);
+			1-attrib.texcoords[2 * v + 1]);
 	}
 	for(size_t shape=0; shape < shapes.size(); shape++)
 	{
@@ -333,8 +333,8 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 			auto texIndex1 = uvContainer[i1.texcoord_index];
 			auto texIndex2 = uvContainer[i2.texcoord_index];
 			m_vertice[i0.vertex_index].setUV(texIndex.x, texIndex.y);
-			m_vertice[i1.vertex_index].setUV(texIndex1.x, texIndex2.y);
-			m_vertice[i2.vertex_index].setUV(texIndex1.x, texIndex2.y);
+			m_vertice[i1.vertex_index].setUV(texIndex1.x, texIndex1.y);
+			m_vertice[i2.vertex_index].setUV(texIndex2.x, texIndex2.y);
 		}
 	}
 	m_indexCount = m_indice.size();
@@ -374,9 +374,6 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 	if(fileList.empty()==false)
 	{
 		HRESULT hr;
-// 		HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
-// 		assert(SUCCEEDED(hr));
-// 			// error
 		for(const auto& it : fileList)
 		{
 			std::wstring wideStr = std::wstring(it.begin(), it.end());
@@ -391,10 +388,33 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 				image.GetMetadata(),
 				&texture);
 			assert(SUCCEEDED(hr));
-			m_textures.emplace_back(texture);
-			image.Release();
 
-			return true;//load only one temporaily
+			if (wideStr.find(L"iffuse") != wideStr.npos || wideStr.find(L"Base") != wideStr.npos)
+			{
+				m_textures[DIFFUSE] = texture;
+			}
+			else if(wideStr.find(L"etallic") != wideStr.npos)
+			{
+				m_textures[METALLIC] = texture;
+			}
+			else if (wideStr.find(L"AO") != wideStr.npos)
+			{
+				m_textures[AO] = texture;
+			}
+			else if (wideStr.find(L"ormal") != wideStr.npos)
+			{
+				m_textures[NORMAL] = texture;
+			}
+			else if (wideStr.find(L"pacity") != wideStr.npos)
+			{
+				m_textures[OPACITY] = texture;
+			}
+			else if (wideStr.find(L"oughness") != wideStr.npos)
+			{
+				m_textures[ROUGHNESS] = texture;
+			}
+
+			image.Release();
 		}
 	}
 

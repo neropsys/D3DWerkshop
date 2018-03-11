@@ -85,6 +85,7 @@ void Camera::Update(double delta)
 	m_target = XMVectorSet(x, y, z-1, .0f);
 	ImGui::Text("right:%f", right);
 	ImGui::Text("delta x:%f, delta y:%f", DInput::MouseDeltaX(), DInput::MouseDeltaY());
+	
 	auto rotMatrix = XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, 0);
 
 
@@ -99,7 +100,9 @@ void Camera::Update(double delta)
 	m_pos += x * m_right;
 	m_pos += z * m_forward;
 	m_pos += XMVectorSet(0, y, 0, 0);
-
+	XMFLOAT3 tempPos;
+	XMStoreFloat3(&tempPos, m_pos);
+	ImGui::Text("campos x:%f, y:%f, z:%f", tempPos.x, tempPos.y, tempPos.z);
 
 	m_target = m_pos + m_target;
 	

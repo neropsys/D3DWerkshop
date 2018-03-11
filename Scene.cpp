@@ -46,7 +46,7 @@ void Scene::Init()
 	auto model = std::make_unique<Model>("lantern\\lantern_obj.obj");
 	model->SetWireFrame(false);
 	m_models.emplace_back(std::move(model));
-	//m_models.emplace_back(std::move(new Gizmo()));
+	m_models.emplace_back(std::move(new Gizmo()));
 
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));

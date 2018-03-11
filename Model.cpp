@@ -94,7 +94,7 @@ Model::Model(const char * fileName)
 			sizeof(c_szName) - 1, c_szName);
 	}
 
-	if (mloader.GetTextureList().empty() == false)
+	if (mloader.HasTexture() == false)
 	{
 		D3D11_SAMPLER_DESC sampDesc;
 		ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -160,6 +160,8 @@ void Model::Draw()
 		D3D::deviceContext->RSSetState(m_wireframe);
 	}
 
+	D3D::deviceContext->PSSetSamplers(0, 1, &m_samplerState);
+	D3D::deviceContext->PSSetShaderResources(0, 1, mloader.GetTexture(ModelLoader::DIFFUSE));
 	D3D::deviceContext->DrawIndexed(m_indexCount, 0, 0);
 	if (m_setwireframe)
 	{
