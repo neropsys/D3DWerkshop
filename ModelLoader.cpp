@@ -59,6 +59,7 @@ bool ModelLoader::Load(const char* path, const char* basePath)
 
 bool ModelLoader::ParseFbx(const char* path)
 {
+	/*
 	bool ret = m_importer->Initialize(path, -1, m_pSdkMgr->GetIOSettings());
 	assert(ret);
 
@@ -274,7 +275,9 @@ bool ModelLoader::ParseFbx(const char* path)
 		}
 
 	}
+	*/
 	return true;
+
 }
 
 bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
@@ -297,11 +300,10 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 	//auto idx = absPathStr.find_last_of("\\");
 	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, absPathStr.c_str(), basePathStr.c_str());
 	assert(ret);
-
 	size_t vertices = attrib.vertices.size() / 3;
 	for (size_t v = 0; v < vertices; v++)
 	{
-		m_vertice.emplace_back(
+		m_standard_vertice.emplace_back(
 			attrib.vertices[3 * v],
 			attrib.vertices[3 * v + 1],
 			attrib.vertices[3 * v + 2]);
@@ -310,18 +312,18 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 	{
 		float x;
 		float y;
-		vec2(float _x, float _y):x(_x), y(_y){}
+		vec2(float _x, float _y) :x(_x), y(_y) {}
 	};
 	std::vector<vec2> uvContainer;
 	for (size_t v = 0; v < attrib.texcoords.size() / 2; v++)
 	{
 		uvContainer.emplace_back(
-			attrib.texcoords[2 * v], 
-			1-attrib.texcoords[2 * v + 1]);
+			attrib.texcoords[2 * v],
+			1 - attrib.texcoords[2 * v + 1]);
 	}
-	for(size_t shape=0; shape < shapes.size(); shape++)
+	for (size_t shape = 0; shape < shapes.size(); shape++)
 	{
-		for (size_t f = 0; f < shapes[shape].mesh.indices.size()/3; f++)
+		for (size_t f = 0; f < shapes[shape].mesh.indices.size() / 3; f++)
 		{
 			tinyobj::index_t i0 = shapes[shape].mesh.indices[3 * f];
 			tinyobj::index_t i1 = shapes[shape].mesh.indices[3 * f + 1];
@@ -332,11 +334,12 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 			auto texIndex = uvContainer[i0.texcoord_index];
 			auto texIndex1 = uvContainer[i1.texcoord_index];
 			auto texIndex2 = uvContainer[i2.texcoord_index];
-			m_vertice[i0.vertex_index].setUV(texIndex.x, texIndex.y);
-			m_vertice[i1.vertex_index].setUV(texIndex1.x, texIndex1.y);
-			m_vertice[i2.vertex_index].setUV(texIndex2.x, texIndex2.y);
+			m_standard_vertice[i0.vertex_index].tex = { texIndex.x, texIndex.y };
+			m_standard_vertice[i1.vertex_index].tex = { texIndex1.x, texIndex1.y };
+			m_standard_vertice[i2.vertex_index].tex = {texIndex2.x, texIndex2.y};
 		}
 	}
+
 	m_indexCount = m_indice.size();
 
 	std::string texturePath = absPath;
@@ -361,7 +364,8 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 			if (is_directory)
 				continue;
 			if (file_name.find(".jpg") != std::string::npos ||
-				file_name.find(".png") != std::string::npos)
+				file_name.find(".png") != std::string::npos ||
+				file_name.find(".BMP") != std::string::npos)
 			{
 				fileList.push_back(full_file_name);
 			}

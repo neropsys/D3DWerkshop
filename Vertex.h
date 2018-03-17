@@ -4,11 +4,12 @@ using namespace DirectX;
 
 struct Vertex
 {
+
+	XMFLOAT3 pos;
+	XMFLOAT4 color;
 	Vertex(float x, float y, float z)
 		: pos(x, y, z), color(1.f, 0.f, 0.f, 1.f)
 	{}
-	XMFLOAT3 pos;
-	XMFLOAT4 color;
 	Vertex(XMFLOAT3 input, XMFLOAT4 in_color = XMFLOAT4(1, 0, 0, 1)):pos(input), color(in_color) {}
 	Vertex(float x, float y, float z, float r, float g, float b = 0.f, float a = 0.f)
 		: pos(x, y, z), color(r, g, b, a)
@@ -28,4 +29,23 @@ struct Vertex
 		return false;
 
 	}
+};
+
+struct StandardVertex
+{
+	StandardVertex(
+		float x,
+		float y,
+		float z, 
+		float u,
+		float v, 
+		float normx, 
+		float normy,
+		float normz):
+	pos(x, y, z), tex(u, v), norm(normx, normy, normz){}
+	StandardVertex(float x, float y, float z):pos(x, y, z), tex(0, 0), norm(0, 0, 0){}
+	XMFLOAT3 pos;
+	XMFLOAT3 norm;
+	XMFLOAT2 tex;
+
 };

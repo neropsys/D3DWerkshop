@@ -5,7 +5,12 @@
 #include "D3D.h"
 #include "ArrowMesh.h"
 
-Gizmo::Gizmo():m_stride(sizeof(Vertex)), m_offset(0), m_world(XMMatrixIdentity()), m_viewProj(XMMatrixIdentity())
+Gizmo::Gizmo():
+	m_stride(sizeof(Vertex)),
+	m_offset(0),
+	m_world(XMMatrixIdentity()), 
+	m_viewProj(XMMatrixIdentity()),
+	m_preRenderState(nullptr)
 {
 	using namespace DirectX;
 	
@@ -82,7 +87,10 @@ void Gizmo::Update(float delta) const
 
 void Gizmo::Draw()
 {
-
+	if (m_preRenderState != nullptr)
+	{
+		m_preRenderState();
+	}
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &m_VBuffer, &m_stride, &m_offset);
 	D3D::deviceContext->IASetIndexBuffer(m_IBuffer, DXGI_FORMAT_R32_UINT, 0);
 	{//x axis
@@ -112,4 +120,9 @@ void Gizmo::Draw()
 void Gizmo::SetViewProj(const DirectX::XMMATRIX& ref)
 {
 	m_viewProj = XMMATRIX(ref);
+}
+
+void Gizmo::PreRenderState(std::function<void() > preState)
+{
+	m_preRenderState = preState;
 }

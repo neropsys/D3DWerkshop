@@ -3,10 +3,8 @@
 #include "Vertex.h"
 #include "D3D.h"
 #include "Utilities.h"
-Model::Model(const char * fileName)
+Model::Model(const char * fileName):Model()
 {
-
-	Model::Model();
 
 	auto filePath = path::GetAbsPath(fileName);
 	auto delimitPos = filePath.find_last_of("\\/");
@@ -17,11 +15,12 @@ Model::Model(const char * fileName)
 	}
 
 	assert(mloader.Load(subDir.c_str(), fileName));
+	static_assert(sizeof(StandardVertex) % 16 == 0, "vertex must be 16byte aligned");
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) *  mloader.GetVertexList().size();
+	vertexBufferDesc.ByteWidth = sizeof(StandardVertex) *  mloader.GetVertexList().size();
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -39,7 +38,7 @@ Model::Model(const char * fileName)
 		m_VBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
 			sizeof(c_szName) - 1, c_szName);
 	}
-	m_stride = sizeof(Vertex);
+	m_stride = sizeof(StandardVertex);
 	m_offset = 0;
 
 	m_indexCount = mloader.GetIndexCount();
@@ -47,7 +46,7 @@ Model::Model(const char * fileName)
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(int) * mloader.GetIndexCount();
+	indexBufferDesc.ByteWidth = sizeof(UINT) * mloader.GetIndexCount();
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 
@@ -77,6 +76,7 @@ Model::Model(const char * fileName)
 	assert(SUCCEEDED(hr));
 	//D3D::deviceContext->IASetVertexBuffers(0, 1, &mVBuffer, &stride, &offset);
 	//D3D::deviceContext->IASetIndexBuffer(mIBuffer, DXGI_FORMAT_R32_UINT, 0);
+	static_assert(sizeof(D3D::cbPerObject) % 16 == 0, "vertex must be 16byte aligned");
 
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
@@ -126,7 +126,8 @@ Model::Model() :
 	m_setwireframe(false),
 	m_constantBuffer(nullptr),
 	m_world(XMMatrixIdentity()),
-	m_samplerState(nullptr)
+	m_samplerState(nullptr),
+	m_preState(nullptr)
 {
 	mloader.Init();
 }
@@ -151,7 +152,10 @@ void Model::Update(float delta) const
 void Model::Draw() 
 {
 
-	
+	if (m_preState != nullptr)
+	{
+		m_preState();
+	}
 	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &m_VBuffer, &m_stride, &m_offset);
 	D3D::deviceContext->IASetIndexBuffer(m_IBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -167,10 +171,17 @@ void Model::Draw()
 	{
 		D3D::deviceContext->RSSetState(0);
 	}
+
+	//todo: reset state?
 }
 
 void Model::SetViewProj(const DirectX::XMMATRIX& ref)
 {
 	m_viewProj = ref;
+}
+
+void Model::PreRenderState(std::function<void() > preState)
+{
+	m_preState = preState;
 }
 

@@ -1,7 +1,8 @@
 #pragma once
 #include "IRender.h"
-#include <vector>
 #include "Vertex.h"
+#include <vector>
+#include <functional>
 class Gizmo : public IRender {
 
 public:
@@ -14,7 +15,11 @@ public:
 
 	virtual void SetViewProj(const DirectX::XMMATRIX& ref) override;
 
+
+	virtual void PreRenderState(std::function<void() > preState) override;
+
 protected:
+	std::function<void()> m_preRenderState;
 	ID3D11Buffer * m_VBuffer;
 	ID3D11Buffer* m_IBuffer;
 	ID3D11Buffer* m_constantBuffer;

@@ -26,38 +26,71 @@ Scene::~Scene()
 	Release(m_pixelShader);
 	Release(m_constantBuffer);
 	Release(m_inputLayout);
+	Release(m_standardInputLayout);
+	Release(m_brdfVertexShader);
+	Release(m_brdfPixelShader);
 }
 
 void Scene::Init()
 {
 	g_cam = std::make_unique<Camera>(1280, 720);
-	ID3D10Blob* g_vsBuffer = nullptr;
-	assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/VertexShader.cso", &g_vsBuffer)));
-	auto hr = D3D::device->CreateVertexShader(g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), NULL, &m_vertexShader);
+	HRESULT hr = S_OK;
+	{
+		ID3D10Blob* vertexBuffer = nullptr;
+		assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/VertexShader.cso", &vertexBuffer)));
+		hr = D3D::device->CreateVertexShader(vertexBuffer->GetBufferPointer(), vertexBuffer->GetBufferSize(), NULL, &m_vertexShader);
 
-	ID3D10Blob* g_psBuffer = nullptr;
-	assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/PixelShader.cso", &g_psBuffer)));
-	hr = D3D::device->CreatePixelShader(g_psBuffer->GetBufferPointer(), g_psBuffer->GetBufferSize(), NULL, &m_pixelShader);
+		ID3D10Blob* pixelBuffer = nullptr;
+		assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/PixelShader.cso", &pixelBuffer)));
+		hr = D3D::device->CreatePixelShader(pixelBuffer->GetBufferPointer(), pixelBuffer->GetBufferSize(), NULL, &m_pixelShader);
 
-	UINT numElements = ARRAYSIZE(vertexLayout);
-	hr = D3D::device->CreateInputLayout(vertexLayout, numElements, g_vsBuffer->GetBufferPointer(), g_vsBuffer->GetBufferSize(), &m_inputLayout);
+		UINT numElements = ARRAYSIZE(vertexLayout);
+		hr = D3D::device->CreateInputLayout(vertexLayout, numElements, vertexBuffer->GetBufferPointer(), vertexBuffer->GetBufferSize(), &m_inputLayout);
+
+		vertexBuffer->Release();
+		pixelBuffer->Release();
+	}
+	{
+		ID3D10Blob* vertexBuffer = nullptr;
+	
+		assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/BRDFVertexShader.cso", &vertexBuffer)));
+		auto hr = D3D::device->CreateVertexShader(vertexBuffer->GetBufferPointer(), vertexBuffer->GetBufferSize(), NULL, &m_brdfVertexShader);
+
+
+		ID3D10Blob* pixelBuffer = nullptr;
+		assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/BRDFPixelShader.cso", &pixelBuffer)));
+		hr = D3D::device->CreatePixelShader(pixelBuffer->GetBufferPointer(), pixelBuffer->GetBufferSize(), NULL, &m_brdfPixelShader);
+		
+		UINT numElements = ARRAYSIZE(vertexLayout_textured);
+		hr = D3D::device->CreateInputLayout(vertexLayout_textured, numElements, vertexBuffer->GetBufferPointer(), vertexBuffer->GetBufferSize(), &m_standardInputLayout);
+
+		vertexBuffer->Release();
+		pixelBuffer->Release();
+	}
 
 	//model.
 	auto model = std::make_unique<Model>("lantern\\lantern_obj.obj");
+	model->PreRenderState([&]()
+	{
+		D3D::deviceContext->IASetInputLayout(m_standardInputLayout);
+		D3D::deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		D3D::deviceContext->VSSetShader(m_brdfVertexShader, 0, 0);
+		D3D::deviceContext->PSSetShader(m_brdfPixelShader, 0, 0);
+	});
+
 	model->SetWireFrame(false);
 	m_models.emplace_back(std::move(model));
-	m_models.emplace_back(std::move(new Gizmo()));
 
-	D3D11_BUFFER_DESC cbbd;
-	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
-	cbbd.Usage = D3D11_USAGE_DEFAULT;
-	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbbd.ByteWidth = sizeof(DirectX::XMMATRIX);
-	cbbd.CPUAccessFlags = 0;
-	cbbd.MiscFlags = 0;
-
-	assert(SUCCEEDED(D3D::device->CreateBuffer(&cbbd, NULL, &m_constantBuffer)));
+	auto gizmo = std::make_unique<Gizmo>();
+	gizmo->PreRenderState([&]()
+	{
+		D3D::deviceContext->IASetInputLayout(m_inputLayout);
+		D3D::deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		D3D::deviceContext->VSSetShader(m_vertexShader, 0, 0);
+		D3D::deviceContext->PSSetShader(m_pixelShader, 0, 0);
+	});
+	m_models.emplace_back(std::move(gizmo));
 }
 
 void Scene::Update(float delta)
@@ -75,10 +108,7 @@ void Scene::Update(float delta)
 
 void Scene::Draw()
 {
-	D3D::deviceContext->IASetInputLayout(m_inputLayout);
-	D3D::deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	D3D::deviceContext->VSSetShader(m_vertexShader, 0, 0);
-	D3D::deviceContext->PSSetShader(m_pixelShader, 0, 0);
+	
 	for (const auto& it : m_models)
 	{
 		it->Draw();

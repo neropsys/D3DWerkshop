@@ -1,4 +1,5 @@
-#include "Vertex.hlsl"
+#include "ConstantBuffer.hlsl"
+#include "Vertex.hlsli"
 VS_OUTPUT main( float4 inPos : POSITION, float4 inColor : COLOR )
 {
 	VS_OUTPUT output;

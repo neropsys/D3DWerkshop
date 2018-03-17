@@ -16,7 +16,7 @@ public:
 		OPACITY,
 		ROUGHNESS
 	};
-	inline const std::vector<Vertex>& GetVertexList() const { return m_vertice; }
+	inline const std::vector<StandardVertex>& GetVertexList() const { return m_standard_vertice; }
 	inline const std::vector<UINT>& GetIndexList() const { return m_indice; }
 	inline const int GetIndexCount() const { return m_indexCount; }
 	inline const bool HasTexture() const { return m_textures.empty(); }
@@ -34,7 +34,7 @@ protected:
 	bool ParseFbx(const char* path);
 	bool ParseObj(const char* absPath, const char* basePath);
 	DirectX::ScratchImage LoadTexture(const wchar_t* fileName);
-	std::vector<Vertex> m_vertice;
+	std::vector<StandardVertex> m_standard_vertice;
 	std::vector<UINT> m_indice;
 	std::map<TextureType, ID3D11ShaderResourceView*> m_textures;
 	std::vector<std::string> m_texturePaths;//map(key std::string(textureType), value std::string(texturePath)

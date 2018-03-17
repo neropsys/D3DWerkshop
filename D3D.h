@@ -8,7 +8,12 @@
 namespace D3D {
 	struct cbPerObject
 	{
+		DirectX::XMMATRIX world;
 		DirectX::XMMATRIX WVP;
+		DirectX::XMFLOAT3 camPos;
+		DirectX::XMFLOAT3 albedo;
+		float roughness;
+		float ao;
 	};
 	template<class T> void Release(T t)
 	{
