@@ -1,10 +1,10 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "Model.h"
 #include "Camera.h"
 #include "IRender.h"
 #include <memory>
+#include "Model.h"
 class Scene {
 
 public:
@@ -14,7 +14,7 @@ public:
 	void Update(float delta);
 	void Draw();
 protected:
-
+	std::unique_ptr<Model> m_model;
 	std::vector<std::unique_ptr<IRender>> m_models;
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11VertexShader* m_brdfVertexShader;

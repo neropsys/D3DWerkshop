@@ -313,6 +313,10 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 		float x;
 		float y;
 		vec2(float _x, float _y) :x(_x), y(_y) {}
+		vec2 operator - (vec2 rh)
+		{
+			return vec2(x - rh.x, y - rh.y);
+		}
 	};
 	std::vector<vec2> uvContainer;
 	for (size_t v = 0; v < attrib.texcoords.size() / 2; v++)
@@ -321,6 +325,13 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 			attrib.texcoords[2 * v],
 			1 - attrib.texcoords[2 * v + 1]);
 	}
+
+	std::vector<XMFLOAT3> normalContainer;
+	for (size_t v = 0; v < attrib.normals.size()/3; v++)
+	{
+		normalContainer.push_back({ attrib.normals[3 * v], attrib.normals[3*v+1], attrib.normals[3*v+2] });
+	}
+
 	for (size_t shape = 0; shape < shapes.size(); shape++)
 	{
 		for (size_t f = 0; f < shapes[shape].mesh.indices.size() / 3; f++)
@@ -337,6 +348,27 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 			m_standard_vertice[i0.vertex_index].tex = { texIndex.x, texIndex.y };
 			m_standard_vertice[i1.vertex_index].tex = { texIndex1.x, texIndex1.y };
 			m_standard_vertice[i2.vertex_index].tex = {texIndex2.x, texIndex2.y};
+
+			auto v0 = DirectX::XMLoadFloat3(&m_standard_vertice[i0.vertex_index].pos);
+			auto v1 = DirectX::XMLoadFloat3(&m_standard_vertice[i1.vertex_index].pos);
+			auto v2 = DirectX::XMLoadFloat3(&m_standard_vertice[i2.vertex_index].pos);
+
+
+			auto deltaPos1 = v1 - v0;
+			auto deltaPos2 = v2 - v0;
+
+			auto deltaUV = texIndex1 - texIndex;
+			auto deltaUV2 = texIndex2 - texIndex;
+
+			float r = 1.f / (deltaUV.x * deltaUV2.y - deltaUV.y * deltaUV.x);
+			auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV.y) * r;
+			XMStoreFloat3(&m_standard_vertice[i0.vertex_index].tan, tangent);
+			XMStoreFloat3(&m_standard_vertice[i1.vertex_index].tan, tangent);
+			XMStoreFloat3(&m_standard_vertice[i2.vertex_index].tan, tangent);
+
+			m_standard_vertice[i0.vertex_index].norm = normalContainer[i0.normal_index];
+			m_standard_vertice[i1.vertex_index].norm = normalContainer[i1.normal_index];
+			m_standard_vertice[i2.vertex_index].norm = normalContainer[i2.normal_index];
 		}
 	}
 

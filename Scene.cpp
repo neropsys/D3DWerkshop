@@ -5,6 +5,8 @@
 #include "Gizmo.h"
 #include "imgui.h"
 #include <string>
+#include "Model.h"
+#include "Cube.h"
 namespace D3D {
 	extern ID3D11Device* device;
 	extern ID3D11DeviceContext* deviceContext;
@@ -52,7 +54,7 @@ void Scene::Init()
 	}
 	{
 		ID3D10Blob* vertexBuffer = nullptr;
-	
+
 		assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/BRDFVertexShader.cso", &vertexBuffer)));
 		auto hr = D3D::device->CreateVertexShader(vertexBuffer->GetBufferPointer(), vertexBuffer->GetBufferSize(), NULL, &m_brdfVertexShader);
 
@@ -60,7 +62,7 @@ void Scene::Init()
 		ID3D10Blob* pixelBuffer = nullptr;
 		assert(SUCCEEDED(D3DReadFileToBlob(L"./Debug/BRDFPixelShader.cso", &pixelBuffer)));
 		hr = D3D::device->CreatePixelShader(pixelBuffer->GetBufferPointer(), pixelBuffer->GetBufferSize(), NULL, &m_brdfPixelShader);
-		
+
 		UINT numElements = ARRAYSIZE(vertexLayout_textured);
 		hr = D3D::device->CreateInputLayout(vertexLayout_textured, numElements, vertexBuffer->GetBufferPointer(), vertexBuffer->GetBufferSize(), &m_standardInputLayout);
 
@@ -69,8 +71,8 @@ void Scene::Init()
 	}
 
 	//model.
-	auto model = std::make_unique<Model>("lantern\\lantern_obj.obj");
-	model->PreRenderState([&]()
+	m_model = std::make_unique<Model>("lantern\\lantern_obj.obj");
+	m_model->PreRenderState([&]()
 	{
 		D3D::deviceContext->IASetInputLayout(m_standardInputLayout);
 		D3D::deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -78,8 +80,8 @@ void Scene::Init()
 		D3D::deviceContext->PSSetShader(m_brdfPixelShader, 0, 0);
 	});
 
-	model->SetWireFrame(false);
-	m_models.emplace_back(std::move(model));
+	m_model->SetWireFrame(false);
+	//m_models.emplace_back(std::move(model));
 
 
 	auto gizmo = std::make_unique<Gizmo>();
@@ -91,18 +93,34 @@ void Scene::Init()
 		D3D::deviceContext->PSSetShader(m_pixelShader, 0, 0);
 	});
 	m_models.emplace_back(std::move(gizmo));
+	auto cubeColor = XMFLOAT4(1, 1, 1, 1);
+	auto cube = std::make_unique<Cube>(5.f, cubeColor);
+	cube->SetPos({ 70, 70, 70});
+	cube->PreRenderState([&]()
+	{
+		D3D::deviceContext->IASetInputLayout(m_inputLayout);
+		D3D::deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		D3D::deviceContext->VSSetShader(m_vertexShader, 0, 0);
+		D3D::deviceContext->PSSetShader(m_pixelShader, 0, 0);
+	});
+	m_models.emplace_back(std::move(cube));
 }
 
 void Scene::Update(float delta)
 {
 		g_cam->Update(delta);
-
+		XMFLOAT3 camPos;
+		XMStoreFloat3(&camPos, g_cam->GetPos());
+		m_model->SetCameraPos(camPos);
+		m_model->SetViewProj(g_cam->getViewProj());
+		m_model->Update(delta);
 
 		for (const auto& it : m_models)
 		{
 			it->SetViewProj(g_cam->getViewProj());
 			it->Update(delta);
 		}
+		
 	
 }
 
@@ -113,6 +131,7 @@ void Scene::Draw()
 	{
 		it->Draw();
 	}
+	m_model->Draw();
 
 }
 

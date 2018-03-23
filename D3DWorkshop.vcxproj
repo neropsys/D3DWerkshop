@@ -175,6 +175,7 @@
     <ClCompile Include="ArrowMesh.cpp" />
     <ClCompile Include="BaseModel.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Cube.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="D3DWorkshop.cpp" />
     <ClCompile Include="DInput.cpp" />

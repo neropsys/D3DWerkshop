@@ -94,6 +94,26 @@ Model::Model(const char * fileName):Model()
 			sizeof(c_szName) - 1, c_szName);
 	}
 
+	static_assert(sizeof(D3D::cbLight) % 16 == 0, "vertex must be 16byte aligned");
+
+	D3D11_BUFFER_DESC cblb;
+	ZeroMemory(&cblb, sizeof(D3D11_BUFFER_DESC));
+
+	cblb.Usage = D3D11_USAGE_DEFAULT;
+	cblb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cblb.ByteWidth = sizeof(D3D::cbLight);
+	cblb.CPUAccessFlags = 0;
+	cblb.MiscFlags = 0;
+
+	assert(SUCCEEDED(D3D::device->CreateBuffer(&cblb, NULL, &m_lightBuffer)));
+	{
+		const char c_szName[] = "light buffer";
+		m_constantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName,
+			sizeof(c_szName) - 1, c_szName);
+	}
+
+
+
 	if (mloader.HasTexture() == false)
 	{
 		D3D11_SAMPLER_DESC sampDesc;
@@ -141,12 +161,33 @@ Model::~Model()
 	Release(m_constantBuffer);
 	Release(m_wireframe);
 	Release(m_samplerState);
+	Release(m_lightBuffer);
 }
 
 void Model::Update(float delta) const
 {
 	auto ret = m_world * m_viewProj;
-	D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &XMMatrixTranspose(ret), 0, 0);
+	D3D::cbPerObject cBuffer;
+	cBuffer.WVP = XMMatrixTranspose(ret);
+	cBuffer.world = m_world;
+	cBuffer.camPos = m_camPos;
+	static float specValue;
+	ImGui::SliderFloat("shininess", &specValue, 1, 100000);
+	cBuffer.specValue = specValue;
+	static D3D::cbLight light;
+	light.pos = { 70, 70, 70 };
+
+	light.color = { 255, 255, 255 };
+	static float rot = 0;
+	rot += .00025f;
+	if (rot > 6.28f)
+		rot = 0.0f;
+	light.pos.x = 70 * cos(rot);
+	light.pos.z = 70 * sin(rot);
+	ImGui::Text("light position:%f, %f", light.pos.x, light.pos.z);
+
+	D3D::deviceContext->UpdateSubresource(m_constantBuffer, 0, NULL, &cBuffer, 0, 0);
+	D3D::deviceContext->UpdateSubresource(m_lightBuffer, 0, NULL, &light, 0, 0);
 }
 
 void Model::Draw() 
@@ -157,6 +198,8 @@ void Model::Draw()
 		m_preState();
 	}
 	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
+	D3D::deviceContext->PSSetConstantBuffers(0, 1, &m_constantBuffer);
+	D3D::deviceContext->PSSetConstantBuffers(1, 1, &m_lightBuffer);
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &m_VBuffer, &m_stride, &m_offset);
 	D3D::deviceContext->IASetIndexBuffer(m_IBuffer, DXGI_FORMAT_R32_UINT, 0);
 	if (m_setwireframe)
@@ -166,6 +209,10 @@ void Model::Draw()
 
 	D3D::deviceContext->PSSetSamplers(0, 1, &m_samplerState);
 	D3D::deviceContext->PSSetShaderResources(0, 1, mloader.GetTexture(ModelLoader::DIFFUSE));
+	D3D::deviceContext->PSSetShaderResources(1, 1, mloader.GetTexture(ModelLoader::NORMAL));
+	D3D::deviceContext->PSSetShaderResources(2, 1, mloader.GetTexture(ModelLoader::METALLIC));
+	D3D::deviceContext->PSSetShaderResources(3, 1, mloader.GetTexture(ModelLoader::ROUGHNESS));
+	D3D::deviceContext->PSSetShaderResources(4, 1, mloader.GetTexture(ModelLoader::AO));
 	D3D::deviceContext->DrawIndexed(m_indexCount, 0, 0);
 	if (m_setwireframe)
 	{

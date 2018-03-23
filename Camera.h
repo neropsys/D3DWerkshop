@@ -8,6 +8,7 @@ public:
 
 	Camera(int width, int height);
 	void Update(double delta);
+	inline DirectX::XMVECTOR GetPos() { return m_pos; }
 	inline const DirectX::XMMATRIX getViewProj() { return m_view * m_proj; };
 	~Camera();
 

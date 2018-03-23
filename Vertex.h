@@ -42,10 +42,12 @@ struct StandardVertex
 		float normx, 
 		float normy,
 		float normz):
-	pos(x, y, z), tex(u, v), norm(normx, normy, normz){}
-	StandardVertex(float x, float y, float z):pos(x, y, z), tex(0, 0), norm(0, 0, 0){}
+	pos(x, y, z), tex(u, v), norm(normx, normy, normz), tan(0, 0, 0){}
+	StandardVertex(float x, float y, float z):pos(x, y, z), tex(0, 0), norm(0, 0, 0), tan(0, 0, 0){}
 	XMFLOAT3 pos;
 	XMFLOAT3 norm;
 	XMFLOAT2 tex;
-
+	XMFLOAT3 tan;
+private:
+	float pad;
 };

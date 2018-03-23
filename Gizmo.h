@@ -25,7 +25,6 @@ protected:
 	ID3D11Buffer* m_constantBuffer;
 	UINT m_stride;
 	UINT m_offset;
-	UINT mindexCount;
 	std::vector<Vertex> m_vertice;
 	std::vector<UINT> m_indice;
 	XMMATRIX m_world;
