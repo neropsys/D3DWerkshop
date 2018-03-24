@@ -35,9 +35,11 @@ protected:
 	ID3D11Buffer* m_IBuffer;
 	ID3D11Buffer* m_constantBuffer;
 	ID3D11Buffer* m_lightBuffer;
-	ID3D11RasterizerState* m_wireframe;
+	ID3D11RasterizerState* m_alphaBlend;
 	ID3D11SamplerState* m_samplerState;
-
+	ID3D11BlendState* m_blendState;
+	ID3D11RasterizerState* m_ccwRasterState;
+	ID3D11RasterizerState* m_cwRasterState;
 	XMFLOAT3 m_camPos;
 	XMFLOAT3 m_rot;
 	XMFLOAT3 m_pos;

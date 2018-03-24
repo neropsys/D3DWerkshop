@@ -354,17 +354,30 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 			auto v2 = DirectX::XMLoadFloat3(&m_standard_vertice[i2.vertex_index].pos);
 
 
-			auto deltaPos1 = v1 - v0;
-			auto deltaPos2 = v2 - v0;
+			DirectX::XMFLOAT3 deltaPos;
+			DirectX::XMStoreFloat3(&deltaPos, v1 - v0);
+
+			DirectX::XMFLOAT3 deltaPos2;
+			DirectX::XMStoreFloat3(&deltaPos2, v2 - v0);
+
 
 			auto deltaUV = texIndex1 - texIndex;
 			auto deltaUV2 = texIndex2 - texIndex;
 
-			float r = 1.f / (deltaUV.x * deltaUV2.y - deltaUV.y * deltaUV.x);
-			auto tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV.y) * r;
-			XMStoreFloat3(&m_standard_vertice[i0.vertex_index].tan, tangent);
-			XMStoreFloat3(&m_standard_vertice[i1.vertex_index].tan, tangent);
-			XMStoreFloat3(&m_standard_vertice[i2.vertex_index].tan, tangent);
+			float r = 1.f / (deltaUV.x * deltaUV2.y - deltaUV2.x * deltaUV.y);
+			
+			float tanX = r * (deltaUV2.y * deltaPos.x - deltaUV.y * deltaPos2.x);
+			float tanY = r * (deltaUV2.y * deltaPos.y - deltaUV.y * deltaPos2.y);
+			float tanZ = r * (deltaUV2.y * deltaPos.z - deltaUV.y * deltaPos2.z);
+			DirectX::XMFLOAT3 tangent(tanX, tanY, tanZ);
+			DirectX::XMVECTOR tangentVector = DirectX::XMLoadFloat3(&tangent);
+
+			tangentVector = DirectX::XMVector3Normalize(tangentVector);
+			DirectX::XMStoreFloat3(&tangent, tangentVector);
+			//auto tangent = (deltaUV2 * deltaPos1 - y) * r;
+			m_standard_vertice[i0.vertex_index].tan= tangent;
+			m_standard_vertice[i1.vertex_index].tan = tangent;
+			m_standard_vertice[i2.vertex_index].tan = tangent;
 
 			m_standard_vertice[i0.vertex_index].norm = normalContainer[i0.normal_index];
 			m_standard_vertice[i1.vertex_index].norm = normalContainer[i1.normal_index];

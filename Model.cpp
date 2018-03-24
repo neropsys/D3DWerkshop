@@ -64,13 +64,13 @@ Model::Model(const char * fileName):Model()
 	}
 	D3D11_RASTERIZER_DESC desc;
 	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
-	desc.FillMode = D3D11_FILL_WIREFRAME;
-	desc.CullMode = D3D11_CULL_NONE;
-	hr = D3D::device->CreateRasterizerState(&desc, &m_wireframe);
+	desc.FillMode = D3D11_FILL_SOLID;
+	desc.CullMode = D3D11_CULL_FRONT;
+	hr = D3D::device->CreateRasterizerState(&desc, &m_alphaBlend);
 
 	{
 		const char c_szName[] = "index m_wireframe";
-		m_wireframe->SetPrivateData(WKPDID_D3DDebugObjectName,
+		m_alphaBlend->SetPrivateData(WKPDID_D3DDebugObjectName,
 			sizeof(c_szName) - 1, c_szName);
 	}
 	assert(SUCCEEDED(hr));
@@ -134,6 +134,37 @@ Model::Model(const char * fileName):Model()
 // 		}
 	}
 
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(blendDesc));
+
+	D3D11_RENDER_TARGET_BLEND_DESC rtbd;
+	ZeroMemory(&rtbd, sizeof(rtbd));
+
+	rtbd.BlendEnable = true;
+	rtbd.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	rtbd.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	rtbd.BlendOp = D3D11_BLEND_OP_ADD;
+	rtbd.SrcBlendAlpha = D3D11_BLEND_ONE;
+	rtbd.DestBlendAlpha = D3D11_BLEND_ZERO;
+	rtbd.BlendOpAlpha = D3D11_BLEND_OP_SUBTRACT;
+	rtbd.RenderTargetWriteMask = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+	blendDesc.AlphaToCoverageEnable = true;
+	blendDesc.RenderTarget[0] = rtbd;
+
+	D3D::device->CreateBlendState(&blendDesc, &m_blendState);
+
+	D3D11_RASTERIZER_DESC cmdesc;
+	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
+
+	cmdesc.FillMode = D3D11_FILL_SOLID;
+	cmdesc.CullMode = D3D11_CULL_BACK;
+
+	cmdesc.FrontCounterClockwise = true;
+	hr = D3D::device->CreateRasterizerState(&cmdesc, &m_ccwRasterState);
+
+	cmdesc.FrontCounterClockwise = false;
+	hr = D3D::device->CreateRasterizerState(&cmdesc, &m_cwRasterState);
 }
 
 Model::Model() :
@@ -142,12 +173,13 @@ Model::Model() :
 	m_stride(0),
 	m_offset(0),
 	m_indexCount(0),
-	m_wireframe(nullptr),
+	m_alphaBlend(nullptr),
 	m_setwireframe(false),
 	m_constantBuffer(nullptr),
 	m_world(XMMatrixIdentity()),
 	m_samplerState(nullptr),
-	m_preState(nullptr)
+	m_preState(nullptr),
+	m_blendState(nullptr)
 {
 	mloader.Init();
 }
@@ -159,9 +191,12 @@ Model::~Model()
 	Release(m_VBuffer);
 	Release(m_IBuffer);
 	Release(m_constantBuffer);
-	Release(m_wireframe);
+	Release(m_alphaBlend);
 	Release(m_samplerState);
 	Release(m_lightBuffer);
+	Release(m_blendState);
+	Release(m_cwRasterState);
+	Release(m_ccwRasterState);
 }
 
 void Model::Update(float delta) const
@@ -175,7 +210,7 @@ void Model::Update(float delta) const
 	ImGui::SliderFloat("shininess", &specValue, 1, 100000);
 	cBuffer.specValue = specValue;
 	static D3D::cbLight light;
-	light.pos = { 70, 70, 70 };
+	light.pos = { 35, 35, 35 };
 
 	light.color = { 255, 255, 255 };
 	static float rot = 0;
@@ -196,28 +231,34 @@ void Model::Draw()
 	if (m_preState != nullptr)
 	{
 		m_preState();
-	}
+	} 
 	D3D::deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 	D3D::deviceContext->PSSetConstantBuffers(0, 1, &m_constantBuffer);
 	D3D::deviceContext->PSSetConstantBuffers(1, 1, &m_lightBuffer);
 	D3D::deviceContext->IASetVertexBuffers(0, 1, &m_VBuffer, &m_stride, &m_offset);
 	D3D::deviceContext->IASetIndexBuffer(m_IBuffer, DXGI_FORMAT_R32_UINT, 0);
-	if (m_setwireframe)
+	if (true)
 	{
-		D3D::deviceContext->RSSetState(m_wireframe);
+		//D3D::deviceContext->RSSetState(m_alphaBlend);
 	}
 
+	D3D::deviceContext->OMSetBlendState(m_blendState, 0, 0xffffffff);
 	D3D::deviceContext->PSSetSamplers(0, 1, &m_samplerState);
 	D3D::deviceContext->PSSetShaderResources(0, 1, mloader.GetTexture(ModelLoader::DIFFUSE));
 	D3D::deviceContext->PSSetShaderResources(1, 1, mloader.GetTexture(ModelLoader::NORMAL));
 	D3D::deviceContext->PSSetShaderResources(2, 1, mloader.GetTexture(ModelLoader::METALLIC));
 	D3D::deviceContext->PSSetShaderResources(3, 1, mloader.GetTexture(ModelLoader::ROUGHNESS));
 	D3D::deviceContext->PSSetShaderResources(4, 1, mloader.GetTexture(ModelLoader::AO));
+	D3D::deviceContext->PSSetShaderResources(5, 1, mloader.GetTexture(ModelLoader::OPACITY));
+	D3D::deviceContext->RSSetState(m_ccwRasterState);
+	D3D::deviceContext->DrawIndexed(m_indexCount, 0, 0);
+	D3D::deviceContext->RSSetState(m_cwRasterState);
 	D3D::deviceContext->DrawIndexed(m_indexCount, 0, 0);
 	if (m_setwireframe)
 	{
 		D3D::deviceContext->RSSetState(0);
 	}
+
 
 	//todo: reset state?
 }

@@ -275,12 +275,12 @@ bool D3D::InitD3D(HINSTANCE hInst, int width, int height, HWND hwnd)
 void D3D::BeginScene()
 {
 	if (!isInitialized) return;
-	float color[4];
-	color[0] = 0.f;//red
-	color[1] = 0.0f;//green
-	color[2] = 0.0f;//blue
-	color[3] = 1;//alpha
-	deviceContext->ClearRenderTargetView(renderTargetView, color);
+	static float bgColor[4];
+
+	ImGui::SliderFloat4("clearColor", bgColor, 0, 1);
+
+
+	deviceContext->ClearRenderTargetView(renderTargetView, bgColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
 }
 

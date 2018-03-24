@@ -15,4 +15,5 @@ Texture2D normalTex : register(t1);
 Texture2D metallicTex : register(t2);
 Texture2D roughnessTex : register(t3);
 Texture2D aoTex : register(t4);
+Texture2D opacityTex : register(t5);
 SamplerState ObjSamplerState;

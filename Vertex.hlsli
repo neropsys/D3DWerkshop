@@ -10,7 +10,7 @@ struct VS_OUTPUT_TEX
 	float3 Normal : NORMAL;
 	float2 tex : TEXCOORD0;
 	float3 tan : TANGENT;
-	float4 worldPos : POSITION0;
-	float3 bitan : TEXCOORD1;
+	float4 worldPos : POSITION1;
+	float3 bitan : TEXCOORD2;
 	float pad : PSIZE0;
 };

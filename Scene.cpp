@@ -95,7 +95,7 @@ void Scene::Init()
 	m_models.emplace_back(std::move(gizmo));
 	auto cubeColor = XMFLOAT4(1, 1, 1, 1);
 	auto cube = std::make_unique<Cube>(5.f, cubeColor);
-	cube->SetPos({ 70, 70, 70});
+	cube->SetPos({ 35, 35, 35 });
 	cube->PreRenderState([&]()
 	{
 		D3D::deviceContext->IASetInputLayout(m_inputLayout);

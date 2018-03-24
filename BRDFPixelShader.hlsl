@@ -52,21 +52,32 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 	float roughness = roughnessTex.Sample(ObjSamplerState, input.tex).r;
 	float metallic = metallicTex.Sample(ObjSamplerState, input.tex).r;
 	float AO = aoTex.Sample(ObjSamplerState, input.tex).r;
-	//float normal = normalTex.Sample(ObjSamplerState, input.tex).r;
+	float Opacity = opacityTex.Sample(ObjSamplerState, input.tex).r;
 
-	float4 camWorldPos = mul(camPos, worldMat);
+	float3 normal = normalTex.Sample(ObjSamplerState, input.tex).rgb;
+	normal = normalize(normal * 2 - 1);
+	float4 camWorldPos = mul(worldMat, camPos);
 
 	float3 F0 = 0.04;
 	F0 = lerp(F0, albedo, metallic);
 
 	float3 T = normalize(input.tan);
 	float3 B = normalize(input.bitan);
-	float3 N = normalize(input.Normal);
+    float3 N = normalize(input.Normal);
+
+    //sN = normalize(input.Normal);
+
+    float3x3 TBN = transpose(float3x3(T, B, N));
+   // N += normal;
+    N = normalize(mul(TBN, normal));
+ 
 	float3 V = normalize(camWorldPos - input.worldPos);
+    //V = mul(TBN, V);
 	float3 p = input.worldPos;
+    //p = mul(TBN, p);
 	float VdotN = max(dot(V, N), 0);
 	float3 Lo = { 0, 0, 0 };
-	float3x3 TBN =  float3x3(T, B, N );
+	
 	{
 
 
@@ -76,6 +87,8 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 
 
 		float3 L = normalize(lightPos - p);
+        //L = mul(TBN, L);
+		//sL =reflect(L,
 		float3 H = normalize(L + V);
 
 		float3 fLambert = albedo / PI;
@@ -136,6 +149,6 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 	//color = color / (color + unitVector);
 
 	//color = color
-
-	return float4(color, 1.0);// albedoTex.Sample(ObjSamplerState, input.tex);
+	//clip(Opacity - .25);
+	return float4(color, Opacity);// albedoTex.Sample(ObjSamplerState, input.tex);
 }
