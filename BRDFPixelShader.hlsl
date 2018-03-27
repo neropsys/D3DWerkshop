@@ -47,8 +47,6 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 	float PI = 3.1415926535897932384626433832795f;
 	float3 unitVector = { 1.0, 1.0, 1.0 };
 	float3 albedo = albedoTex.Sample(ObjSamplerState, input.tex).rgb;
-	//albedo = pow(albedo, gamma);
-	//albedo = pow(albedo, vec3)
 	float roughness = roughnessTex.Sample(ObjSamplerState, input.tex).r;
 	float metallic = metallicTex.Sample(ObjSamplerState, input.tex).r;
 	float AO = aoTex.Sample(ObjSamplerState, input.tex).r;
@@ -65,16 +63,15 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 	float3 B = normalize(input.bitan);
     float3 N = normalize(input.Normal);
 
-    //sN = normalize(input.Normal);
 
     float3x3 TBN = transpose(float3x3(T, B, N));
-   // N += normal;
+
     N = normalize(mul(TBN, normal));
  
 	float3 V = normalize(camWorldPos - input.worldPos);
-    //V = mul(TBN, V);
+
 	float3 p = input.worldPos;
-    //p = mul(TBN, p);
+
 	float VdotN = max(dot(V, N), 0);
 	float3 Lo = { 0, 0, 0 };
 	
@@ -87,8 +84,6 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 
 
 		float3 L = normalize(lightPos - p);
-        //L = mul(TBN, L);
-		//sL =reflect(L,
 		float3 H = normalize(L + V);
 
 		float3 fLambert = albedo / PI;
@@ -107,28 +102,7 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 
 		float NdotL = max(dot(N, L), 0.0);
 		Lo += (kD * fLambert + specular) * Li * NdotL;
-
-		//float LdotN = max(dot(N, L), 0);
-		//float3 fCookTorrance = (NDF * F * G) / (4 * VdotN * LdotN + 0.001);
-
-
-
-		//float3 BRDF = kD * fLambert + fCookTorrance;
-	//	Lo += BRDF * Li * LdotN;
-
-		/*
-		float3 F0 = { 0.04, 0.04, 0.04 };
-		F0 = lerp(F0, albedo, metallic);
-		float NDF = DistributionGGX(N, H, roughness);
-		float3 kD = unitVector - F;
-		kD += 1.0 - metallic;
-
-		float3 nominator = NDF * G * F;
-		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		float3 specular = nominator / max(denominator, 0.001);
-
-		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * lambertDif + specular) * radiance * NdotL;*/
+        
 	}
 
 
@@ -138,17 +112,5 @@ float4 main(VS_OUTPUT_TEX input) : SV_TARGET
 	float3 indirectLight =   albedo * AO;
 	float3 color = indirectLight + Lo * specValue;
 
-	//color = color / (color + 1.0);
-	//color = pow(color, 1.0 / 2.2);
-	//color = color / (color + 1.0);	// HDR
-	//color = pow(color, 1.0 / gamma);	// Gamma correction
-//	color = color / (color + unitVector);
-//	color = pow(color, 1.0 / gamma);
-
-
-	//color = color / (color + unitVector);
-
-	//color = color
-	//clip(Opacity - .25);
-	return float4(color, Opacity);// albedoTex.Sample(ObjSamplerState, input.tex);
+	return float4(color, Opacity);
 }

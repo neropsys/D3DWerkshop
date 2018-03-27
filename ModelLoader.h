@@ -37,8 +37,8 @@ protected:
 	std::vector<StandardVertex> m_standard_vertice;
 	std::vector<UINT> m_indice;
 	std::map<TextureType, ID3D11ShaderResourceView*> m_textures;
-	std::vector<std::string> m_texturePaths;//map(key std::string(textureType), value std::string(texturePath)
-	int m_indexCount;						//or load instantly and set as value
+	std::vector<std::string> m_texturePaths;
+	int m_indexCount;						
 	FbxManager* m_pSdkMgr;
 	FbxImporter* m_importer;
 	FbxScene* m_scene;

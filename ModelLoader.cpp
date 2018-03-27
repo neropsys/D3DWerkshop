@@ -374,7 +374,7 @@ bool ModelLoader::ParseObj(const char* absPath, const char* basePath)
 
 			tangentVector = DirectX::XMVector3Normalize(tangentVector);
 			DirectX::XMStoreFloat3(&tangent, tangentVector);
-			//auto tangent = (deltaUV2 * deltaPos1 - y) * r;
+
 			m_standard_vertice[i0.vertex_index].tan= tangent;
 			m_standard_vertice[i1.vertex_index].tan = tangent;
 			m_standard_vertice[i2.vertex_index].tan = tangent;

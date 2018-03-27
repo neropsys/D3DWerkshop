@@ -66,9 +66,6 @@
     <ClInclude Include="Gizmo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ArrowMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,9 +138,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gizmo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArrowMesh.cpp">

@@ -20,7 +20,6 @@ public:
 
 	virtual void PreRenderState(std::function<void()> preState) override;
 
-	//virtual inline  void SetViewProj(const XMMATRIX& viewProj) { m_viewProj = viewProj; };
 protected:
 	std::function<void()> m_preState;
 	UINT m_stride;
